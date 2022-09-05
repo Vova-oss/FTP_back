@@ -61,8 +61,8 @@ public class BrandController {
     })
     @PutMapping("/edit")
     public void editBrand(
-            @ApiParam(value = ":id бренда, который мы хотим редактировать",
-                      example = "{\n\"id\":\"5\"\n}",
+            @ApiParam(value = ":id бренда, который мы хотим редактировать, новое имя",
+                      example = "{\n\"id\":\"5\"\n,\n\"name\":\"Apple\"\n}",
                       required = true)
             @RequestBody String body,
             HttpServletRequest request,

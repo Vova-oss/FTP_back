@@ -126,9 +126,13 @@ public class BrandService {
      */
     public void editBrand(String body, HttpServletRequest request, HttpServletResponse response){
         String id = StaticMethods.parsingJson(body, "id", request, response);
+        String name = StaticMethods.parsingJson(body, "name", request, response);
+        if(id==null||name==null)
+            return;
+
         Brand brand = brandRepository.findById(Long.valueOf(id)).orElse(null);
         if(brand!=null){
-            brand.setName(StaticMethods.parsingJson(body, "name", request, response));
+            brand.setName(name);
             brandRepository.save(brand);
             StaticMethods.createResponse(request, response, HttpServletResponse.SC_CREATED, "Created");
         }
