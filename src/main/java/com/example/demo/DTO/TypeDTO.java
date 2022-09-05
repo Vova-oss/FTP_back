@@ -16,8 +16,8 @@ public class TypeDTO {
     @ApiModelProperty(notes = "Название Типа", name = "name", required = true, example = "Смартфоны")
     private String name;
 
-    @ApiModelProperty(notes = "Бренды, принадлежащие к данному Типу", name = "brandsDTO")
-    private List<BrandDTO> brandDTOS;
+    @ApiModelProperty(notes = "Бренды, принадлежащие к данному Типу", name = "brands")
+    private List<BrandDTO> brands;
 
     public static TypeDTO creat(Type type){
         TypeDTO typeDTO = new TypeDTO();
@@ -29,7 +29,7 @@ public class TypeDTO {
 //            array[list.indexOf(brandDTO)] = brandDTO.getName();
 //        }
 //        typeDTO.setBrandDTOS(array);
-        typeDTO.setBrandDTOS(BrandDTO.createList(type.getBrands()));
+        typeDTO.setBrands(BrandDTO.createList(type.getBrands()));
         return typeDTO;
     }
 
