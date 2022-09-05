@@ -1,7 +1,6 @@
 package com.example.demo.DTO;
 
 import com.example.demo.Entity.Device;
-import com.example.demo.Entity.Device_info;
 import com.example.demo.Entity.Rating;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -40,8 +39,8 @@ public class DeviceDTO {
     @ApiModelProperty(notes = "Рейтинг данного девайса", name = "ratings", example = "4.9")
     private double ratings;
 
-    @ApiModelProperty(notes = "Дополнительная инфа о Девайсе", name = "deviceInfosDTO")
-    private List<Device_infoDTO> deviceInfosDTO;
+    @ApiModelProperty(notes = "Дополнительная инфа о Девайсе", name = "device_infoResponseModels")
+    private List<Device_infoDTO> device_infoResponseModels;
 
     public static DeviceDTO create(Device device){
         DeviceDTO deviceDTO = new DeviceDTO();
@@ -53,7 +52,7 @@ public class DeviceDTO {
         deviceDTO.setTypeName(device.getTypeId().getName());
         deviceDTO.setBrandName(device.getBrandId().getName());
         deviceDTO.setRatings(deviceDTO.createRating(device));
-        deviceDTO.setDeviceInfosDTO(Device_infoDTO.createList(device.getDeviceInfos()));
+        deviceDTO.setDevice_infoResponseModels(Device_infoDTO.createList(device.getDeviceInfos()));
         return deviceDTO;
     }
 

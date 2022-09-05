@@ -10,7 +10,7 @@ import java.util.List;
 public class DeviceWIthNecessaryParameters {
 
     @ApiModelProperty(value = "Девайсы без лишних полей")
-    List<DeviceDTO> listDTO;
+    List<DeviceDTO> list;
 
     @ApiModelProperty(value = "Количество всех существующих девайсов")
     int amountOfAllDevices;
@@ -21,8 +21,8 @@ public class DeviceWIthNecessaryParameters {
     @ApiModelProperty(value = "Максимальная цена по данному запросу")
     String minPrice;
 
-    public DeviceWIthNecessaryParameters(List<DeviceDTO> listDTO, int amountOfAllDevices, String maxPrice, String minPrice) {
-        this.listDTO = listDTO;
+    public DeviceWIthNecessaryParameters(List<DeviceDTO> list, int amountOfAllDevices, String maxPrice, String minPrice) {
+        this.list = list;
         this.amountOfAllDevices = amountOfAllDevices;
         this.maxPrice = maxPrice;
         this.minPrice = minPrice;
