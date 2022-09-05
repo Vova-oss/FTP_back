@@ -63,7 +63,7 @@ public class OrderController {
 
 
     @ApiOperation(value = "Изменение статуса у заказа")
-    @PostMapping("/changeStatusOfOrder")
+    @PutMapping("/changeStatusOfOrder")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Created"),

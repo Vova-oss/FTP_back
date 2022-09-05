@@ -1,6 +1,5 @@
 package com.example.demo.DTO;
 
-import com.example.demo.Entity.Device;
 import com.example.demo.Entity.Order_device;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -11,8 +10,8 @@ import java.util.List;
 @Data
 public class Order_deviceDTO {
 
-    @ApiModelProperty(notes = "Девайс в заказе", name = "deviceDTO", required = true)
-    private DeviceDTO deviceDTO;
+    @ApiModelProperty(notes = "Девайс в заказе", name = "deviceResponseModel", required = true)
+    private DeviceDTO deviceResponseModel;
 
     @ApiModelProperty(notes = "Количество данного Девайса в заказе", name = "amountOfProduct",
             required = true, example = "7")
@@ -20,7 +19,7 @@ public class Order_deviceDTO {
 
     public static Order_deviceDTO create(Order_device order_device){
         Order_deviceDTO order_deviceDTO = new Order_deviceDTO();
-        order_deviceDTO.setDeviceDTO(DeviceDTO.create(order_device.getDevice()));
+        order_deviceDTO.setDeviceResponseModel(DeviceDTO.create(order_device.getDevice()));
         order_deviceDTO.setAmountOfProduct(order_device.getAmountOfProduct());
         return order_deviceDTO;
     }
