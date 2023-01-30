@@ -28,7 +28,7 @@ public class TypeController {
     @ApiOperation(value = "Добавление новогоТипа")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
-            @ApiResponse(code = 432, message = "Such Type already exists")
+            @ApiResponse(code = 400, message = "Such Type already exists")
     })
     @PostMapping("/add")
     public void addType(
@@ -37,10 +37,8 @@ public class TypeController {
                     example = "{\n\"name\":\"Смартфон\"\n}",
                     required = true
             )
-            @RequestBody String typeName,
-            HttpServletResponse response,
-            HttpServletRequest request)  {
-        typeService.addType(typeName, request, response);
+            @RequestBody String typeName)  {
+        typeService.addType(typeName);
     }
 
     @ApiOperation(value = "Получение всех Типов и принадлежащих к ним Брендов")
@@ -54,7 +52,7 @@ public class TypeController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 204, message = "No Content"),
-            @ApiResponse(code = 432, message = "There isn't exist Type with this :id")
+            @ApiResponse(code = 400, message = "There isn't exist Type with this :id")
     })
     @DeleteMapping("/delete")
     public void deleteType(
@@ -63,10 +61,8 @@ public class TypeController {
                     example = "{\n\"id\":\"5\"\n}",
                     required = true
             )
-            @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
-        typeService.deleteType(body, request, response);
+            @RequestBody String body){
+        typeService.deleteType(body);
     }
 
 
@@ -74,7 +70,7 @@ public class TypeController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 432, message = "There isn't exist Type with this :id")
+            @ApiResponse(code = 400, message = "There isn't exist Type with this :id")
     })
     @PutMapping("/edit")
     public void editType(
@@ -83,10 +79,8 @@ public class TypeController {
                     example = "{\n\"id\":\"5\",\n\"name\":\"Холодильник\"\n}",
                     required = true
             )
-            @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
-        typeService.editType(body, request, response);
+            @RequestBody String body){
+        typeService.editType(body);
     }
 
 

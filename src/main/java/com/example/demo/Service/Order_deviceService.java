@@ -1,13 +1,11 @@
 package com.example.demo.Service;
 
+import com.example.demo.Entity.Device;
 import com.example.demo.Entity.Order;
 import com.example.demo.Entity.Order_device;
-import com.example.demo.Entity.Device;
 import com.example.demo.Repositories.Order_deviceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class Order_deviceService {

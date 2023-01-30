@@ -83,7 +83,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             }catch (JWTDecodeException e){
                 return null;
             }catch (TokenExpiredException e){
-                StaticMethods.createResponse(request, response, 468, "Token was expired");
+                StaticMethods.createResponse(400, "Token was expired");
                 return null;
             }
             return null;

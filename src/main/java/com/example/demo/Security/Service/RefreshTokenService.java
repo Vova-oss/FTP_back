@@ -75,8 +75,8 @@ public class RefreshTokenService {
     /**
      * Обновление refresh-токена и jwt-токена (от клиента нужны они оба. В ответе в хедер запихнутся 2 новых)
      * @code 201 - Created
-     * @code 432 - Refresh token doesn't exist
-     * @code 433 - Refresh token was expired
+     * @code 400 - Refresh token doesn't exist
+     * @code 400 - Refresh token was expired
      * */
     public void refreshToken(HttpServletRequest request, HttpServletResponse response){
 
@@ -85,8 +85,7 @@ public class RefreshTokenService {
         if(rToken!=null && jwToken!=null){
             RefreshToken refreshToken = findByToken(rToken).orElse(null);
             if(refreshToken == null){
-                StaticMethods.createResponse(request, response,
-                        432,"Refresh token doesn't exist");
+                StaticMethods.createResponse(400,"Refresh token doesn't exist");
                 String telephoneNumber = jwTokenService.decodeJWT(jwToken);
                 UserEntity userEntity = userService.findByTelephoneNumber(telephoneNumber);
                 if(userEntity!=null){
@@ -96,8 +95,7 @@ public class RefreshTokenService {
             }
             refreshToken = verifyExpiration(refreshToken);
             if(refreshToken == null){
-                StaticMethods.createResponse(request, response,
-                        433,"Refresh token was expired");
+                StaticMethods.createResponse(400,"Refresh token was expired");
                 return;
             }
 
@@ -110,8 +108,7 @@ public class RefreshTokenService {
             //Устанавливаем, какие хедеры может видеть фронт
             response.addHeader("Access-Control-Expose-Headers", HEADER_JWT_STRING+","+HEADER_RT_STRING);
 
-            StaticMethods.createResponse(request, response,
-                    HttpServletResponse.SC_CREATED, "Created");
+            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
 
         }
 

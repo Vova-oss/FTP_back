@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,9 +49,9 @@ public class OrderService {
      *
      * @code 201 - Created
      * @code 400 - Incorrect JSON
-     * @code 469 - Incorrect validation (ValidationService.class)
+     * @code 400 - Incorrect validation (ValidationService.class)
      */
-    public void addAnOrder(String body, HttpServletRequest request, HttpServletResponse response){
+    public void addAnOrder(String body, HttpServletRequest request){
 
         //Получение telephoneNumber текущего пользователя по токену
         String email = jwTokenService.
@@ -65,14 +64,14 @@ public class OrderService {
             JSONArray array = object.getJSONArray("orderItems");
             Long totalSumCheck = object.getLong("totalSumCheck");
 
-            Order order = createNewOrder(request, response, user, totalSumCheck);
+            Order order = createNewOrder(user, totalSumCheck);
             if(order == null)
                 return;
 
             for(int i = 0; i< array.length(); i++){
 
                     JSONObject current = array.getJSONObject(i);
-                    Device device = deviceService.getById(current.getString("id"), request, response);
+                    Device device = deviceService.getById(current.getString("id"));
                     if(device==null){
                         continue;
                     }
@@ -80,10 +79,10 @@ public class OrderService {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            StaticMethods.createResponse(request, response, 400, "Incorrect JSON");
+            StaticMethods.createResponse(400, "Incorrect JSON");
             return;
         }
-        StaticMethods.createResponse(request, response, 201, "Created");
+        StaticMethods.createResponse(201, "Created");
     }
 
 
@@ -93,18 +92,15 @@ public class OrderService {
      * @param totalSumCheck общая сумма Заказа
      * @return созданный Заказ в БД (с :id)
      *
-     * @code 469 - Incorrect validation (ValidationService.class)
+     * @code 400 - Incorrect validation (ValidationService.class)
      */
-    public Order createNewOrder(HttpServletRequest request,
-                                HttpServletResponse response,
-                                UserEntity user,
-                                Long totalSumCheck){
+    public Order createNewOrder(UserEntity user, Long totalSumCheck){
         Order order = new Order();
         order.setUser(user);
         order.setStatus(EStatusOfOrder.ACTIVE);
         order.setTotalSumCheck(totalSumCheck);
         order.setDataOfCreate(System.currentTimeMillis());
-        if(!validationService.validation(request, response, user))
+        if(!validationService.validation(user))
             return null;
         return orderRepository.save(order);
     }
@@ -148,20 +144,20 @@ public class OrderService {
      *             status - новый статус Заказа (ACTIVE/INACTIVE)
      * @code 201 - Created
      * @code 400 - Incorrect JSON
-     * @code 432 - Order with this :id doesn't exist
-     * @code 433 - Incorrect status
+     * @code 400 - Order with this :id doesn't exist
+     * @code 400 - Incorrect status
      */
-    public void changeStatusOfOrder(String body, HttpServletRequest request, HttpServletResponse response) {
+    public void changeStatusOfOrder(String body) {
 
-        String id = StaticMethods.parsingJson(body, "id", request, response);
-        String status = StaticMethods.parsingJson(body, "status", request, response);
+        String id = StaticMethods.parsingJson(body, "id");
+        String status = StaticMethods.parsingJson(body, "status");
         if(id == null || status == null)
             return;
 
         Optional<Order> optionalOrder = orderRepository.findById(Long.valueOf(id));
         Order order = optionalOrder.orElse(null);
         if(order == null){
-            StaticMethods.createResponse(request, response, 432, "Order with this :id doesn't exist");
+            StaticMethods.createResponse(400, "Order with this :id doesn't exist");
             return;
         }
 
@@ -169,13 +165,13 @@ public class OrderService {
         try {
              eStatus= EStatusOfOrder.valueOf(status);
         }catch (IllegalArgumentException e){
-            StaticMethods.createResponse(request, response, 433, "Incorrect status");
+            StaticMethods.createResponse(400, "Incorrect status");
             return;
         }
 
         order.setStatus(eStatus);
         orderRepository.save(order);
-        StaticMethods.createResponse(request, response, 201, "Created");
+        StaticMethods.createResponse(201, "Created");
 
     }
 }

@@ -1,6 +1,7 @@
 package com.example.demo.Controller.AuxiliaryClasses;
 
 import com.example.demo.Entity.BaseEntity;
+import com.example.demo.ReqResContextSettings.ReqResContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,10 +24,12 @@ public class StaticMethods {
      * @param status - статус ответа
      * @param info - инфорация, которая будет прописана под полем "info"
      */
-    public static void createResponse(HttpServletRequest request,
-                                      HttpServletResponse response,
-                                      int status,
-                                      String info){
+    public static void createResponse(int status, String info){
+
+        ReqResContext context = ReqResContext.getCurrentInstance();
+        HttpServletRequest request = context.getRequest();
+        HttpServletResponse response = context.getResponse();
+
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(status);
 //        response.addHeader("Access-Control-Allow-Origin", "*" );
@@ -51,17 +54,19 @@ public class StaticMethods {
      * @param field лист полей, к которым относятся ошибки
      * @param info характеристика каждой ошибки
      *
-     * @code 469 - Incorrect validation
+     * @code 400 - Incorrect validation
      */
-    public static void createBadResponseDueToValidation(HttpServletRequest request,
-                                      HttpServletResponse response,
-                                      List<String> field,
-                                      List<String> info){
+    public static void createBadResponseDueToValidation(List<String> field, List<String> info){
+
+        ReqResContext context = ReqResContext.getCurrentInstance();
+        HttpServletRequest request = context.getRequest();
+        HttpServletResponse response = context.getResponse();
+
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(469);
+        response.setStatus(400);
 
         final Map<String, Object> body = new HashMap<>();
-        body.put("status", 469);
+        body.put("status", 400);
         body.put("field", field);
         body.put("info", info);
         body.put("path", request.getServletPath());
@@ -84,14 +89,12 @@ public class StaticMethods {
      * @code 400 - Incorrect JSON
      */
     public static String parsingJson (String body,
-                                      String field,
-                                      HttpServletRequest request ,
-                                      HttpServletResponse response) {
+                                      String field) {
         try {
             JSONObject jsonObject = new JSONObject(body);
             field = jsonObject.getString(field);
         } catch (JSONException e) {
-            StaticMethods.createResponse(request, response, HttpServletResponse.SC_BAD_REQUEST, "Incorrect JSON");
+            StaticMethods.createResponse(HttpServletResponse.SC_BAD_REQUEST, "Incorrect JSON");
             return null;
         }
         return field;
@@ -119,7 +122,7 @@ public class StaticMethods {
                                                     HttpServletResponse response,
                                                     JpaRepository<T, Long> repository){
 
-        String field = parsingJson(body, "id", request, response);
+        String field = parsingJson(body, "id");
         if (field == null)
             return null;
 

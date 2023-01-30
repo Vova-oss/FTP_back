@@ -40,8 +40,8 @@ public class SecurityController {
     @ApiOperation(value = "Обновление токенов (В хедере необходимы два токена с именами ExpiredJWT и RefreshToken")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
-            @ApiResponse(code = 432, message = "Refresh token doesn't exist"),
-            @ApiResponse(code = 433, message = "Refresh token was expired")
+            @ApiResponse(code = 400, message = "Refresh token doesn't exist"),
+            @ApiResponse(code = 400, message = "Refresh token was expired")
     })
     @PostMapping("/refreshToken")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response){

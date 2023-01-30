@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
@@ -33,11 +32,11 @@ public class BrandService {
      *             которому принадлежит Бренд, и название нового Бренда(name)
      * @code 201 - Created
      * @code 400 - Incorrect JSON
-     * @code 432 - Such Brand of this Type already exist
-     * @code 433 - Such Type doesn't exist
+     * @code 400 - Such Brand of this Type already exist
+     * @code 400 - Such Type doesn't exist
      */
-    public void addBrand(String body, HttpServletRequest request, HttpServletResponse response) {
-        Type type = typeService.findByName(StaticMethods.parsingJson(body, "type", request, response));
+    public void addBrand(String body) {
+        Type type = typeService.findByName(StaticMethods.parsingJson(body, "type"));
 
         Brand brand = new Brand();
         if(type!=null){
@@ -53,8 +52,7 @@ public class BrandService {
             List<Brand> list = type.getBrands();
             for(Brand currentBrand: list){
                 if(currentBrand.getName().equals(brand.getName())){
-                    StaticMethods.createResponse(
-                            request, response,432,
+                    StaticMethods.createResponse(400,
                             "Such Brand of this Type already exist");
                     return;
                 }
@@ -62,13 +60,11 @@ public class BrandService {
 
             brand.setTypeId(type);
             brandRepository.save(brand);
-            StaticMethods.createResponse(request,response,HttpServletResponse.SC_CREATED, "Created");
+            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
             return;
         }
 
-        StaticMethods.createResponse(
-                request, response,433,
-                "Such Type doesn't exist");
+        StaticMethods.createResponse(400, "Such Type doesn't exist");
     }
 
 
@@ -88,10 +84,10 @@ public class BrandService {
      * @param body [json] :id Бренда, который необходимо удалить
      * @code 204 - No Content
      * @code 400 - Incorrect JSON
-     * @code 432 - There isn't exist Brand with this id
+     * @code 400 - There isn't exist Brand with this id
      */
-    public void deleteBrand(String body, HttpServletRequest request, HttpServletResponse response) {
-        String id = StaticMethods.parsingJson(body, "id", request, response);
+    public void deleteBrand(String body) {
+        String id = StaticMethods.parsingJson(body, "id");
         if(id == null)
             return;
         Brand brand = brandRepository.findById(Long.valueOf(id)).orElse(null);
@@ -106,12 +102,11 @@ public class BrandService {
 
 
             brandRepository.delete(brand);
-            StaticMethods.createResponse(request, response, HttpServletResponse.SC_NO_CONTENT, "No Content");
+            StaticMethods.createResponse(HttpServletResponse.SC_NO_CONTENT, "No Content");
             return;
         }
 
-        StaticMethods.createResponse(
-                request, response, 432, "There isn't exist Brand with this id");
+        StaticMethods.createResponse( 400, "There isn't exist Brand with this id");
     }
 
 
@@ -122,11 +117,11 @@ public class BrandService {
      *
      * @code 201 - Created
      * @code 400 - Incorrect JSON
-     * @code 432 - There isn't exist Brand with this id
+     * @code 400 - There isn't exist Brand with this id
      */
-    public void editBrand(String body, HttpServletRequest request, HttpServletResponse response){
-        String id = StaticMethods.parsingJson(body, "id", request, response);
-        String name = StaticMethods.parsingJson(body, "name", request, response);
+    public void editBrand(String body){
+        String id = StaticMethods.parsingJson(body, "id");
+        String name = StaticMethods.parsingJson(body, "name");
         if(id==null||name==null)
             return;
 
@@ -134,10 +129,9 @@ public class BrandService {
         if(brand!=null){
             brand.setName(name);
             brandRepository.save(brand);
-            StaticMethods.createResponse(request, response, HttpServletResponse.SC_CREATED, "Created");
+            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
         }
 
-        StaticMethods.createResponse(
-                request, response, 432, "There isn't exist Brand with this id");
+        StaticMethods.createResponse( 400, "There isn't exist Brand with this id");
     }
 }

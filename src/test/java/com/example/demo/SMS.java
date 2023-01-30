@@ -3,14 +3,11 @@ package com.example.demo;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.jsoup.Connection;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
-import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 public class SMS {

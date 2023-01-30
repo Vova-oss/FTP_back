@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -55,10 +54,10 @@ public class DeviceService {
      *
      * @code 201 - Created
      * @code 400 - Incorrect JSON
-     * @code 432 - This name of Device already exists
-     * @code 433 - This Type doesn't exist
-     * @code 434 - This Brand (%s) of this Type (%s) doesn't exist
-     * @code 435 - Incorrect image extension
+     * @code 400 - This name of Device already exists
+     * @code 400 - This Type doesn't exist
+     * @code 400 - This Brand (%s) of this Type (%s) doesn't exist
+     * @code 400 - Incorrect image extension
      */
     public void addDevice(String brandName,
                           String typeName,
@@ -66,14 +65,12 @@ public class DeviceService {
                           String ref,
                           String name,
                           String price,
-                          JSONArray list,
-                          HttpServletRequest request,
-                          HttpServletResponse response) {
+                          JSONArray list) {
 
         Device device = new Device();
 
-        createDeviceAndSaveInDB(device, brandName, typeName, file, ref, name, price, request, response);
-        createDeviceInfoAndSaveInDB(list, device, request, response);
+        createDeviceAndSaveInDB(device, brandName, typeName, file, ref, name, price);
+        createDeviceInfoAndSaveInDB(list, device);
     }
 
     /**
@@ -86,10 +83,10 @@ public class DeviceService {
      * @param name название Девайса
      * @param price цена Девайса
      *
-     * @code 432 - This name of Device already exists
-     * @code 433 - This Type doesn't exist
-     * @code 434 - This Brand (%s) of this Type (%s) doesn't exist
-     * @code 435 - Incorrect image extension
+     * @code 400 - This name of Device already exists
+     * @code 400 - This Type doesn't exist
+     * @code 400 - This Brand (%s) of this Type (%s) doesn't exist
+     * @code 400 - Incorrect image extension
      */
     public void createDeviceAndSaveInDB(Device device,
                                         String brandName,
@@ -97,30 +94,23 @@ public class DeviceService {
                                         MultipartFile file,
                                         String ref,
                                         String name,
-                                        String price,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response){
+                                        String price){
         if(deviceRepository.existsByName(name)){
             Device temp = deviceRepository.findById(device.getId()).orElse(null);
             if(temp == null || !temp.getName().equals(name)){
-                StaticMethods.createResponse(
-                        request, response,
-                        432, "This name of Device already exists");
+                StaticMethods.createResponse(400, "This name of Device already exists");
                 return;
             }
 
         }
         Type type = typeService.findByName(typeName);
         if(type == null){
-            StaticMethods.createResponse(
-                    request, response,
-                    433, "This Type doesn't exist");
+            StaticMethods.createResponse(400, "This Type doesn't exist");
             return;
         }
         Brand brand = brandService.findByNameAndTypeId(brandName, type);
         if(brand == null){
-            StaticMethods.createResponse(request, response,
-                    434,
+            StaticMethods.createResponse(400,
                     String.format(
                             "This Brand (%s) of this Type (%s) doesn't exist",
                             typeName,
@@ -141,10 +131,7 @@ public class DeviceService {
                             && !startName.equals("wbmp")
                             && !startName.equals("webp"))
             ){
-                StaticMethods.createResponse(
-                        request,
-                        response,
-                        435,
+                StaticMethods.createResponse(400,
                         "Incorrect image extension");
                 return;
             }
@@ -183,10 +170,7 @@ public class DeviceService {
      * @code 201 - Created
      * @code 400 - Incorrect JSON
      */
-    public void createDeviceInfoAndSaveInDB(JSONArray list,
-                                            Device device,
-                                            HttpServletRequest request,
-                                            HttpServletResponse response){
+    public void createDeviceInfoAndSaveInDB(JSONArray list, Device device){
         try {
 
             for(int i = 0; i < list.length(); i++){
@@ -198,18 +182,17 @@ public class DeviceService {
                     device_info = new ObjectMapper().readValue(characteristic, Device_info.class);
                 } catch (JsonProcessingException e ){
                     e.printStackTrace();
-                    StaticMethods.createResponse(
-                            request, response, 400, "Incorrect JSON");
+                    StaticMethods.createResponse( 400, "Incorrect JSON");
                     return;
                 }
                 device_info.setDevice(device);
                 device_infoService.addDevice_info(device_info);
             }
 
-            StaticMethods.createResponse(request, response, HttpServletResponse.SC_CREATED, "Created");
+            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
 
         } catch (JSONException e) {
-            StaticMethods.createResponse(request, response, HttpServletResponse.SC_BAD_REQUEST, "Incorrect JSON");
+            StaticMethods.createResponse(HttpServletResponse.SC_BAD_REQUEST, "Incorrect JSON");
             e.printStackTrace();
         }
     }
@@ -224,22 +207,19 @@ public class DeviceService {
      * @param minPrice минимальная цена Девайса
      * @param maxPrice максимальная цена Девайса
      *
-     * @code = 432 - The minPrice more than the maxPrice
-     * @code = 433 - Devices with this type doesn't exists
-     * @code = 434 - Devices with this brands doesn't exists
-     * @code = 435 - Devices with this price doesn't exists
-     * @code = 436 - Incorrect data of page or limit
+     * @code = 400 - The minPrice more than the maxPrice
+     * @code = 400 - Devices with this type doesn't exists
+     * @code = 400 - Devices with this brands doesn't exists
+     * @code = 400 - Devices with this price doesn't exists
+     * @code = 400 - Incorrect data of page or limit
      */
     public DeviceWIthNecessaryParameters getByParams(String type,
                                            List<String> brands,
                                            int page, int limit,
-                                           int minPrice, int maxPrice,
-                                           HttpServletRequest request,
-                                           HttpServletResponse response) {
+                                           int minPrice, int maxPrice) {
 
         if(maxPrice!=-1 && minPrice > maxPrice){
-            StaticMethods.createResponse(
-                    request, response,432,"The minPrice more than the maxPrice");
+            StaticMethods.createResponse(400,"The minPrice more than the maxPrice");
             return null;
         }
 
@@ -250,8 +230,7 @@ public class DeviceService {
              list = deviceRepository.findAllByTypeId(typeService.findByName(type));
 
             if(list.isEmpty()){
-                StaticMethods.createResponse(
-                        request, response,433,"Devices with this type doesn't exists");
+                StaticMethods.createResponse(400,"Devices with this type doesn't exists");
                 return null;
             }
         }else {
@@ -264,8 +243,7 @@ public class DeviceService {
             }
 
             if(list.isEmpty()){
-                StaticMethods.createResponse(
-                        request, response,434,"Devices with this brands doesn't exists");
+                StaticMethods.createResponse(400,"Devices with this brands doesn't exists");
                 return null;
             }
         }
@@ -280,8 +258,7 @@ public class DeviceService {
         list = selectionByPrice(list, minPrice, maxPrice);
 
         if(list.isEmpty()){
-            StaticMethods.createResponse(
-                    request, response,435,"Devices with this price doesn't exists");
+            StaticMethods.createResponse(400,"Devices with this price doesn't exists");
             return null;
         }
 
@@ -294,8 +271,7 @@ public class DeviceService {
         int fromIndex = (page - 1) * limit;
         int toIndex = page * limit;
         if(fromIndex >= list.size()){
-            StaticMethods.createResponse(
-                    request, response,436,"Incorrect data of page or limit");
+            StaticMethods.createResponse(400,"Incorrect data of page or limit");
             return null;
         }
         if(toIndex > list.size()){
@@ -366,11 +342,11 @@ public class DeviceService {
      *
      * @code 204 - No Content
      * @code 400 - Incorrect JSON
-     * @code 432 - There isn't exist Device with this id
+     * @code 400 - There isn't exist Device with this id
      */
-    public void deleteDevice(String body, HttpServletRequest request, HttpServletResponse response) {
+    public void deleteDevice(String body) {
 
-        String id = StaticMethods.parsingJson(body, "id", request, response);
+        String id = StaticMethods.parsingJson(body, "id");
         if(id == null)
             return;
         Device device = deviceRepository.findById(Long.valueOf(id)).orElse(null);
@@ -378,27 +354,23 @@ public class DeviceService {
         if(device!=null && device.getIsName()){
             new File(System.getProperty("user.dir").replace("\\","/") + "/src/main/resources/static/images/" + device.getPathFile()).delete();
             deviceRepository.delete(device);
-            StaticMethods.createResponse(request, response,
-                    HttpServletResponse.SC_NO_CONTENT, "No Content");
+            StaticMethods.createResponse(HttpServletResponse.SC_NO_CONTENT, "No Content");
             return;
         }
 
-        StaticMethods.createResponse(
-                request, response,432,"There isn't exist Device with this id");
+        StaticMethods.createResponse(400,"There isn't exist Device with this id");
     }
 
 
     /**
      * Получение Девайса и дальнейшее его конвертирование в DeviceDTO
      * @param id :id Девайса
-     * @code 432 - There isn't exist Device with this id
+     * @code 400 - There isn't exist Device with this id
      */
-    public DeviceDTO getDTOById(String id, HttpServletRequest request, HttpServletResponse response) {
+    public DeviceDTO getDTOById(String id) {
         Device device = deviceRepository.findById(Long.valueOf(id)).orElse(null);
         if(device==null){
-            StaticMethods.createResponse(
-                    request, response,432,
-                    "There isn't exist Device with this id");
+            StaticMethods.createResponse(400,"There isn't exist Device with this id");
             return null;
         }
         return DeviceDTO.create(device);
@@ -407,14 +379,12 @@ public class DeviceService {
     /**
      * Получение Девайса по :id
      * @param id :id Девайса
-     * @code 432 - There isn't exist Device with this id
+     * @code 400 - There isn't exist Device with this id
      */
-    public Device getById(String id, HttpServletRequest request, HttpServletResponse response){
+    public Device getById(String id){
         Device device = deviceRepository.findById(Long.valueOf(id)).orElse(null);
         if(device==null){
-            StaticMethods.createResponse(
-                    request, response,432,
-                    "There isn't exist Device with this id");
+            StaticMethods.createResponse(400,"There isn't exist Device with this id");
             return null;
         }
         return device;
@@ -433,11 +403,11 @@ public class DeviceService {
      *
      * @code 201 - Created
      * @code 400 - Incorrect JSON
-     * @code 432 - This name of Device already exists
-     * @code 433 - This Type doesn't exist
-     * @code 434 - This Brand (%s) of this Type (%s) doesn't exist
-     * @code 435 - Incorrect image extension
-     * @code 436 - Device with this :id doesn't exist
+     * @code 400 - This name of Device already exists
+     * @code 400 - This Type doesn't exist
+     * @code 400 - This Brand (%s) of this Type (%s) doesn't exist
+     * @code 400 - Incorrect image extension
+     * @code 400 - Device with this :id doesn't exist
      */
     public void editDevice(String id,
                            String brand,
@@ -446,20 +416,16 @@ public class DeviceService {
                            MultipartFile file,
                            String name,
                            String price,
-                           JSONArray list,
-                           HttpServletRequest request,
-                           HttpServletResponse response) {
+                           JSONArray list) {
 
         Device device = deviceRepository.findById(Long.valueOf(id)).orElse(null);
         if(device == null){
-            StaticMethods.createResponse(request, response, 436, "Device with this :id doesn't exist");
+            StaticMethods.createResponse(400, "Device with this :id doesn't exist");
             return;
         }
 
-        createDeviceAndSaveInDB(device, brand, type, file, ref, name, price, request, response);
-        createDeviceInfoAndSaveInDB(list, device, request, response);
-
-
+        createDeviceAndSaveInDB(device, brand, type, file, ref, name, price);
+        createDeviceInfoAndSaveInDB(list, device);
     }
 
 }

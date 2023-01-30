@@ -43,22 +43,21 @@ public class UserService {
      * @param body [json] поля сущности UserEntity
      * @code 201 - Created
      * @code 400 - Incorrect JSON
-     * @code 432 - User with this telephoneNumber already exist
-     * @code 469 - Incorrect validation (ValidationService.class)
+     * @code 400 - User with this telephoneNumber already exist
+     * @code 400 - Incorrect validation (ValidationService.class)
      */
-    public void addUser(String body, HttpServletRequest request, HttpServletResponse response) {
+    public void addUser(String body) {
 
-        String fio = StaticMethods.parsingJson(body, "FIO", request, response);
-        String password = StaticMethods.parsingJson(body, "password", request, response);
-        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber", request, response);
+        String fio = StaticMethods.parsingJson(body, "FIO");
+        String password = StaticMethods.parsingJson(body, "password");
+        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
 
         if(fio == null || password == null || telephoneNumber == null)
             return;
 
         UserEntity userEntity = findByTelephoneNumber(telephoneNumber);
         if(userEntity != null && userEntity.getTimeOfCreation() == null) {
-            StaticMethods.createResponse(request, response,
-                    432,"User with this telephoneNumber already exist");
+            StaticMethods.createResponse(400,"User with this telephoneNumber already exist");
             return;
         }
         if(userEntity == null)
@@ -83,7 +82,7 @@ public class UserService {
         // ------------Отправка кода через сообщение. Отключено, ибо списывает деньги)) -------------------------------------------------------!!!!!!!!!!!!!!!!
 //        sendingSMS.createSMS(userEntity.getTelephoneNumber(), String.valueOf(userEntity.getCode()));
 
-        StaticMethods.createResponse(request, response, HttpServletResponse.SC_CREATED, "Created");
+        StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
     }
 
 
@@ -141,22 +140,21 @@ public class UserService {
      *             code - код.
      * @code 201 - Code is confirmed
      * @code 400 - Incorrect JSON
-     * @code 432 - User with this :telephoneNumber doesn't exist
-     * @code 433 - Incorrect code
-     * @code 434 - Code has already been confirmed
+     * @code 400 - User with this :telephoneNumber doesn't exist
+     * @code 400 - Incorrect code
+     * @code 400 - Code has already been confirmed
      */
-    public void codeConfirmation(String body, HttpServletRequest request, HttpServletResponse response) {
+    public void codeConfirmation(String body) {
 
-        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber", request, response);
-        String code = StaticMethods.parsingJson(body, "code", request ,response);
+        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
+        String code = StaticMethods.parsingJson(body, "code");
         if(code == null || telephoneNumber == null)
             return;
 
         synchronized (SingletonOne.getSingleton()) {
             UserEntity userEntity = findByTelephoneNumber(telephoneNumber);
             if (userEntity == null) {
-                StaticMethods.createResponse(
-                        request, response, 432, "User with this :telephoneNumber doesn't exist");
+                StaticMethods.createResponse(400, "User with this :telephoneNumber doesn't exist");
                 return;
             }
 
@@ -165,51 +163,51 @@ public class UserService {
                 userEntity.setTimeOfCreation(null);
                 userEntity.setVerification(true);
                 userRepository.save(userEntity);
-                StaticMethods.createResponse(request, response, 201, "Code is confirmed");
+                StaticMethods.createResponse(201, "Code is confirmed");
             } else {
                 if (userEntity.getCode() == null)
-                    StaticMethods.createResponse(request, response, 434, "Code has already been confirmed");
+                    StaticMethods.createResponse(400, "Code has already been confirmed");
                 else
-                    StaticMethods.createResponse(request, response, 433, "Incorrect code");
+                    StaticMethods.createResponse(400, "Incorrect code");
             }
         }
 
     }
 
-    public void sendSMSForPasswordRecovery(String body, HttpServletRequest request, HttpServletResponse response) {
+    public void sendSMSForPasswordRecovery(String body) {
 
-        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber", request, response);
+        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
         if(telephoneNumber == null)
             return;
 
         UserEntity userEntity = findByTelephoneNumber(telephoneNumber);
         if(userEntity == null || !userEntity.getVerification()){
-            StaticMethods.createResponse(request, response, 432, "User with this :telephoneNumber doesn't exist");
+            StaticMethods.createResponse(400, "User with this :telephoneNumber doesn't exist");
             return;
         }
 
         userEntity.setTimeOfCreation(System.currentTimeMillis());
         userEntity.setCode((int) (Math.random() * 1_000_000));
         sendingSMS.createSMS(telephoneNumber, String.valueOf(userEntity.getCode()));
-        StaticMethods.createResponse(request, response, 201, "Code has been sent");
+        StaticMethods.createResponse(201, "Code has been sent");
     }
 
-    public void changePassword(String body, HttpServletRequest request, HttpServletResponse response) {
+    public void changePassword(String body) {
 
-        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber", request, response);
-        String newPassword = StaticMethods.parsingJson(body, "password", request ,response);
+        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
+        String newPassword = StaticMethods.parsingJson(body, "password");
         if(newPassword == null || telephoneNumber == null)
             return;
 
         UserEntity userEntity = findByTelephoneNumber(telephoneNumber);
         if(userEntity == null){
-            StaticMethods.createResponse(request, response, 432, "User with this :telephoneNumber doesn't exist");
+            StaticMethods.createResponse(400, "User with this :telephoneNumber doesn't exist");
             return;
         }
 
         userEntity.setPassword(bCryptPasswordEncoder.encode(newPassword));
         userRepository.save(userEntity);
-        StaticMethods.createResponse(request, response, 201, "Password have changed");
+        StaticMethods.createResponse(201, "Password have changed");
 
     }
 

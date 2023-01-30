@@ -29,10 +29,10 @@ public class DeviceController {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Created"),
             @ApiResponse(code = 400, message = "Incorrect JSON"),
-            @ApiResponse(code = 432, message = "This name of Device already exists"),
-            @ApiResponse(code = 433, message = "This Type doesn't exist"),
-            @ApiResponse(code = 434, message = "This Brand of this Type doesn't exist"),
-            @ApiResponse(code = 435, message = "Incorrect image extension")
+            @ApiResponse(code = 400, message = "This name of Device already exists"),
+            @ApiResponse(code = 400, message = "This Type doesn't exist"),
+            @ApiResponse(code = 400, message = "This Brand of this Type doesn't exist"),
+            @ApiResponse(code = 400, message = "Incorrect image extension")
     })
     @PostMapping(value = "/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public void addDevice(
@@ -62,22 +62,20 @@ public class DeviceController {
             @ApiParam(hidden = true)
             @RequestParam("price") String price,
             @ApiParam(hidden = true)
-            @RequestParam("characteristic") JSONArray list,
-            HttpServletRequest request,
-            HttpServletResponse response){
+            @RequestParam("characteristic") JSONArray list){
 
-        deviceService.addDevice(brand, type, file, ref, name, price, list, request, response);
+        deviceService.addDevice(brand, type, file, ref, name, price, list);
 
     }
 
 
     @ApiOperation(value = "Получение Девайсов по параметрам")
     @ApiResponses(value = {
-            @ApiResponse(code = 432, message = "The minPrice more than the maxPrice"),
-            @ApiResponse(code = 433, message = "Devices with this type doesn't exists"),
-            @ApiResponse(code = 434, message = "Devices with this brands doesn't exists"),
-            @ApiResponse(code = 435, message = "Devices with this price doesn't exists"),
-            @ApiResponse(code = 436, message = "Incorrect data of page or limit")
+            @ApiResponse(code = 400, message = "The minPrice more than the maxPrice"),
+            @ApiResponse(code = 400, message = "Devices with this type doesn't exists"),
+            @ApiResponse(code = 400, message = "Devices with this brands doesn't exists"),
+            @ApiResponse(code = 400, message = "Devices with this price doesn't exists"),
+            @ApiResponse(code = 400, message = "Incorrect data of page or limit")
     })
     @GetMapping("/getByParams")
     public DeviceWIthNecessaryParameters getByParams(
@@ -111,11 +109,9 @@ public class DeviceController {
                     value = "Максимальная цена девайса",
                     example = "5000"
             )
-             @RequestParam(value = "maxPrice", required = false, defaultValue = "-1") int maxPrice,
-                            HttpServletRequest request,
-                            HttpServletResponse response){
+             @RequestParam(value = "maxPrice", required = false, defaultValue = "-1") int maxPrice){
 
-        return deviceService.getByParams(type, brand, page, limit, minPrice, maxPrice, request, response);
+        return deviceService.getByParams(type, brand, page, limit, minPrice, maxPrice);
     }
 
 
@@ -123,7 +119,7 @@ public class DeviceController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 204, message = "No Content"),
-            @ApiResponse(code = 432, message = "There isn't exist Device with this id")
+            @ApiResponse(code = 400, message = "There isn't exist Device with this id")
     })
     @DeleteMapping("/delete")
     public void deleteDevice(
@@ -132,9 +128,8 @@ public class DeviceController {
                     example = "{\n\"id\":\"5\"\n}"
             )
             @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
-        deviceService.deleteDevice(body, request, response);
+            HttpServletRequest request){
+        deviceService.deleteDevice(body);
     }
 
 
@@ -143,10 +138,10 @@ public class DeviceController {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Created"),
             @ApiResponse(code = 400, message = "Incorrect JSON"),
-            @ApiResponse(code = 432, message = "This name of Device already exists"),
-            @ApiResponse(code = 433, message = "This Type doesn't exist"),
-            @ApiResponse(code = 434, message = "This Brand of this Type doesn't exist"),
-            @ApiResponse(code = 435, message = "Incorrect image extension")
+            @ApiResponse(code = 400, message = "This name of Device already exists"),
+            @ApiResponse(code = 400, message = "This Type doesn't exist"),
+            @ApiResponse(code = 400, message = "This Brand of this Type doesn't exist"),
+            @ApiResponse(code = 400, message = "Incorrect image extension")
     })
     @PutMapping(value = "/edit", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public void editDevice(
@@ -181,16 +176,14 @@ public class DeviceController {
             @ApiParam(hidden = true)
             @RequestParam("price") String price,
             @ApiParam(hidden = true)
-            @RequestParam("characteristic") JSONArray list,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        deviceService.editDevice(id, brand, type, ref,file, name, price, list, request, response);
+            @RequestParam("characteristic") JSONArray list) {
+        deviceService.editDevice(id, brand, type, ref,file, name, price, list);
     }
 
 
     @ApiOperation(value = "Получение девайса по :id")
     @ApiResponses(value = {
-            @ApiResponse(code = 432, message = "There isn't exist Device with this id")
+            @ApiResponse(code = 400, message = "There isn't exist Device with this id")
     })
     @GetMapping("/getById/{id}")
     public DeviceDTO getById(
@@ -202,7 +195,7 @@ public class DeviceController {
             @PathVariable String id,
             HttpServletRequest request,
             HttpServletResponse response){
-        return deviceService.getDTOById(id, request, response);
+        return deviceService.getDTOById(id);
     }
 
 

@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
@@ -28,26 +27,24 @@ public class TypeService {
      * Добавление Типа
      * @param name название Типа
      * @code 201 - Created
-     * @code 432 - Such Type already exists
+     * @code 400 - Such Type already exists
      */
-    public void addType(String name, HttpServletRequest request, HttpServletResponse response){
+    public void addType(String name){
         Type type;
         try {
             type = new ObjectMapper().readValue(name, Type.class);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            StaticMethods.createResponse(
-                    request, response, 400, "Incorrect JSON");
+            StaticMethods.createResponse(400, "Incorrect JSON");
             return;
         }
 
         if(!typeRepository.existsByName(type.getName())){
             typeRepository.save(type);
-            StaticMethods.createResponse(request, response, HttpServletResponse.SC_CREATED, "Created");
+            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
             return;
         }
-        StaticMethods.createResponse(
-                request, response, 432, "Such Type already exists");
+        StaticMethods.createResponse( 400, "Such Type already exists");
     }
 
 
@@ -70,11 +67,11 @@ public class TypeService {
      * @param body [json] содержит :id Типа
      * @code 204 - No Content
      * @code 400 - Incorrect JSON
-     * @code 432 - There isn't exist Type with this :id
+     * @code 400 - There isn't exist Type with this :id
      */
-    public void deleteType(String body, HttpServletRequest request, HttpServletResponse response) {
+    public void deleteType(String body) {
 
-        String id = StaticMethods.parsingJson(body, "id", request, response);
+        String id = StaticMethods.parsingJson(body, "id");
         if(id == null)
             return;
         Type type = typeRepository.findById(Long.valueOf(id)).orElse(null);
@@ -89,11 +86,10 @@ public class TypeService {
             }
 
             typeRepository.delete(type);
-            StaticMethods.createResponse(request, response, HttpServletResponse.SC_NO_CONTENT, "No Content");
+            StaticMethods.createResponse(HttpServletResponse.SC_NO_CONTENT, "No Content");
         }
 
-        StaticMethods.createResponse(
-                request, response, 432, "There isn't exist Type with this :id");
+        StaticMethods.createResponse( 400, "There isn't exist Type with this :id");
     }
 
 
@@ -104,24 +100,23 @@ public class TypeService {
      *             name - новое название Типа
      * @code 201 - Created
      * @code 400 - Incorrect JSON
-     * @code 432 There isn't exist Type with this :id
+     * @code 400 There isn't exist Type with this :id
      */
-    public void editType(String body, HttpServletRequest request, HttpServletResponse response) {
+    public void editType(String body) {
 
-        String id = StaticMethods.parsingJson(body, "id", request, response);
+        String id = StaticMethods.parsingJson(body, "id");
         if(id == null)
             return;
         Type type = typeRepository.findById(Long.valueOf(id)).orElse(null);
 
         if(type != null){
-            String name = StaticMethods.parsingJson(body,"name", request, response);
+            String name = StaticMethods.parsingJson(body,"name");
             type.setName(name);
             typeRepository.save(type);
-            StaticMethods.createResponse(request, response, HttpServletResponse.SC_CREATED, "Created");
+            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
         }
 
-        StaticMethods.createResponse(
-                request, response, 432, "There isn't exist Type with this :id");
+        StaticMethods.createResponse( 400, "There isn't exist Type with this :id");
     }
 
 

@@ -23,8 +23,8 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 400, message = "Incorrect JSON"),
-            @ApiResponse(code = 432, message = "There isn't exist Device with this id"),
-            @ApiResponse(code = 469, message = "Json-формат со следующими полями:\nfield - лист полей, к которым " +
+            @ApiResponse(code = 400, message = "There isn't exist Device with this id"),
+            @ApiResponse(code = 400, message = "Json-формат со следующими полями:\nfield - лист полей, к которым " +
                     "относятся ошибки\ninfo - характеристика каждой ошибки")
     })
     @PostMapping("/add")
@@ -36,10 +36,9 @@ public class OrderController {
                     required = true
             )
             @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
+            HttpServletRequest request){
 
-        orderService.addAnOrder(body, request, response);
+        orderService.addAnOrder(body, request);
     }
 
 
@@ -67,8 +66,8 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 432, message = "Order with this :id doesn't exist"),
-            @ApiResponse(code = 433, message = "Incorrect status")
+            @ApiResponse(code = 400, message = "Order with this :id doesn't exist"),
+            @ApiResponse(code = 400, message = "Incorrect status")
     })
     public void changeStatusOfOrder(
             @ApiParam(
@@ -76,8 +75,9 @@ public class OrderController {
                     example = "{\n\"id\":\"5\",\n\"status\":\"ACTIVE\"\n}",
                     required = true
             )
-            @RequestBody String body, HttpServletRequest request, HttpServletResponse response){
-        orderService.changeStatusOfOrder(body, request, response);
+            @RequestBody String body
+    ){
+        orderService.changeStatusOfOrder(body);
     }
 
 }

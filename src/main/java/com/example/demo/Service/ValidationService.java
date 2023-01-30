@@ -2,21 +2,13 @@ package com.example.demo.Service;
 
 
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-import com.example.demo.Entity.Response.ResponseClass;
-import com.example.demo.Entity.UserEntity;
-import org.apache.catalina.User;
-import org.json.JSONException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.Errors;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -32,11 +24,9 @@ public class ValidationService {
      * @param <T> класс объекта t
      * @return true, если валидация прошла успеша; false, если обнаружены ошибки
      *
-     * @code 469 - Incorrect validation
+     * @code 400 - Incorrect validation
      */
-    public <T> boolean validation(HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  T t){
+    public <T> boolean validation(T t){
 
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
         Validator validator = validatorFactory.getValidator();
@@ -49,7 +39,7 @@ public class ValidationService {
                 fields.add(String.valueOf(constraintViolation.getPropertyPath()));
                 info.add(constraintViolation.getMessage());
             }
-            StaticMethods.createBadResponseDueToValidation(request, response, fields, info);
+            StaticMethods.createBadResponseDueToValidation(fields, info);
             return false;
         }
         return true;

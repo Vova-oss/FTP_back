@@ -1,6 +1,6 @@
 package com.example.demo;
 
-import com.example.demo.Entity.Response.ResponseClass;
+import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
 import com.example.demo.Entity.UserEntity;
 import com.example.demo.Service.ValidationService;
 import org.json.JSONException;
@@ -8,12 +8,9 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
 import java.io.File;
 import java.util.Base64;
@@ -25,17 +22,17 @@ class DemoApplicationTests {
     ValidationService validationService;
 
     @Test
-    void validationUserEntity(HttpServletRequest request, HttpServletResponse  response){
+    void validationUserEntity(){
         UserEntity userEntity = new UserEntity();
         userEntity.setPassword(" ");
         userEntity.setTelephoneNumber("");
-        validationService.validation(request, response,userEntity);
+        validationService.validation(userEntity);
     }
 
     @ExceptionHandler(value = ConstraintViolationException.class)
-    public ResponseEntity<ResponseClass> ExceptionOfTokenExpired(HttpServletRequest request){
+    public void ExceptionOfTokenExpired(){
         System.out.println("SOMETHING WRONG");
-        return ResponseEntity.status(400).body(new ResponseClass(400, "Incorrect JSON (EX)", request.getServletPath()));
+        StaticMethods.createResponse(400, "Incorrect JSON (EX)");
     }
 
     @Test

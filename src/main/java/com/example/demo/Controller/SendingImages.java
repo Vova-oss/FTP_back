@@ -30,22 +30,18 @@ public class SendingImages {
     @ApiOperation(value = "Отправка картинки по её названию (картинка раскладывается на байты)")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 432, message = "Image with this name doesn't exist")
+            @ApiResponse(code = 400, message = "Image with this name doesn't exist")
     })
     @GetMapping("/takeImage/{imageName}")
     public ResponseEntity<Resource> sendImage(
             @ApiParam(value = "Имя картинки",
                       example = "4c9fc881-be63-4372-881a-3f4e0962e29cScreenshot_1.png",
                       required = true)
-            @PathVariable String imageName,
-            HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+            @PathVariable String imageName) throws IOException {
 
         Path path =Paths.get(System.getProperty("user.dir").replace("\\","/") + "/src/main/resources/static/images/"+imageName);
         if(!Files.exists(path)){
-            StaticMethods.createResponse(
-                    request, response, 432,
-                    "Image with this name doesn't exist");
+            StaticMethods.createResponse(400, "Image with this name doesn't exist");
             return null;
         }
 

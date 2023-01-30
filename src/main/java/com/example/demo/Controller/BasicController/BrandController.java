@@ -21,18 +21,16 @@ public class BrandController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 432, message = "Such Brand of this Type already exist"),
-            @ApiResponse(code = 433, message = "Such Type doesn't exist")
+            @ApiResponse(code = 400, message = "Such Brand of this Type already exist"),
+            @ApiResponse(code = 400, message = "Such Type doesn't exist")
     })
     @PostMapping("/add")
     public void addBrand(
             @ApiParam(value = "Название бренда и название типа",
                       example = "{\n\"name\":\"Apple\",\n\"type\":\"Смартфоны\"\n}",
                       required = true)
-            @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response)  {
-        brandService.addBrand(body, request, response);
+            @RequestBody String body)  {
+        brandService.addBrand(body);
     }
 
 
@@ -40,34 +38,30 @@ public class BrandController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 204, message = "No Content"),
-            @ApiResponse(code = 432, message = "There isn't exist Brand with this id")
+            @ApiResponse(code = 400, message = "There isn't exist Brand with this id")
     })
     @DeleteMapping("/delete")
     public void deleteBrand(
             @ApiParam(value = ":id бренда, который мы хотим удалить",
                       example = "{\n\"id\":\"5\"\n}",
                       required = true)
-            @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
-        brandService.deleteBrand(body, request, response);
+            @RequestBody String body){
+        brandService.deleteBrand(body);
     }
 
     @ApiOperation(value = "Редактирование бренда")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Created"),
-            @ApiResponse(code = 432, message = "There isn't exist Brand with this id")
+            @ApiResponse(code = 400, message = "There isn't exist Brand with this id")
     })
     @PutMapping("/edit")
     public void editBrand(
             @ApiParam(value = ":id бренда, который мы хотим редактировать, новое имя",
                       example = "{\n\"id\":\"5\"\n,\n\"name\":\"Apple\"\n}",
                       required = true)
-            @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
-        brandService.editBrand(body, request, response);
+            @RequestBody String body){
+        brandService.editBrand(body);
     }
 
 }

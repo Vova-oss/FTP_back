@@ -87,7 +87,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         //Устанавливаем, какие хедеры может видеть фронт
         response.addHeader("Access-Control-Expose-Headers", HEADER_JWT_STRING + "," + HEADER_RT_STRING);
 
-        StaticMethods.createResponse(request, response, HttpServletResponse.SC_OK, role);
+        StaticMethods.createResponse(HttpServletResponse.SC_OK, role);
     }
 
 
@@ -99,7 +99,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void unsuccessfulAuthentication(HttpServletRequest request,
                                               HttpServletResponse response,
                                               AuthenticationException failed) {
-        StaticMethods.createResponse(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        StaticMethods.createResponse(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 
     }
 }

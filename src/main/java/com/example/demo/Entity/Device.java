@@ -36,7 +36,7 @@ public class Device extends BaseEntity{
 
     @ApiModelProperty(notes = "Путь до картинки", name = "pathFile", required = true,
             example = "3e9f88a8-6f12-4683-88c8-c6e6d3efc593fff.png")
-    @Column(name = "path_file")
+    @Column(name = "path_file", columnDefinition = "TEXT")
     private String pathFile;
 
 

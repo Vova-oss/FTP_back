@@ -26,8 +26,8 @@ public class UserController {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Created"),
             @ApiResponse(code = 400, message = "Incorrect JSON"),
-            @ApiResponse(code = 432, message = "User with this telephoneNumber already exist"),
-            @ApiResponse(code = 469, message = "Json-формат со следующими полями:\nfield - лист полей, к которым " +
+            @ApiResponse(code = 400, message = "User with this telephoneNumber already exist"),
+            @ApiResponse(code = 400, message = "Json-формат со следующими полями:\nfield - лист полей, к которым " +
                     "относятся ошибки\ninfo - характеристика каждой ошибки")
     })
     @PostMapping("/registration")
@@ -37,10 +37,8 @@ public class UserController {
                       example = "{\n\"FIO\":\"Полетаев Владимир Викторович\", " +
                               "\n\"telephoneNumber\": \"+79645932177\",\n\"password\": \"password\"}",
                       required = true)
-            @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
-        userService.addUser(body, request, response);
+            @RequestBody String body){
+        userService.addUser(body);
     }
 
     @ApiOperation(value = "Подтверждение кода")
@@ -48,9 +46,9 @@ public class UserController {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Code is confirmed"),
             @ApiResponse(code = 400, message = "Incorrect JSON"),
-            @ApiResponse(code = 432, message = "User with this :telephoneNumber doesn't exist"),
-            @ApiResponse(code = 433, message = "Incorrect code"),
-            @ApiResponse(code = 434, message = "Code has already been confirmed")
+            @ApiResponse(code = 400, message = "User with this :telephoneNumber doesn't exist"),
+            @ApiResponse(code = 400, message = "Incorrect code"),
+            @ApiResponse(code = 400, message = "Code has already been confirmed")
     })
 //    @CrossOrigin("*")
     @PutMapping("/codeConfirmation")
@@ -59,11 +57,9 @@ public class UserController {
                     value = "Телефонный номер и код подтверждения",
                     example = "{\n\"telephoneNumber\": \"+79645932177\",\n\"code\": \"468175\"}",
                     required = true)
-            @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
+            @RequestBody String body){
 
-        userService.codeConfirmation(body, request, response);
+        userService.codeConfirmation(body);
 
     }
 
@@ -72,7 +68,7 @@ public class UserController {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Code has been sent"),
             @ApiResponse(code = 400, message = "Incorrect JSON"),
-            @ApiResponse(code = 432, message = "User with this :telephoneNumber doesn't exist"),
+            @ApiResponse(code = 400, message = "User with this :telephoneNumber doesn't exist"),
     })
     @PutMapping("/sendSMSForPasswordRecovery")
     public void sendSMSForPasswordRecovery(
@@ -80,11 +76,9 @@ public class UserController {
                     value = "Телефонный номер",
                     example = "{\n\"telephoneNumber\": \"+79645932177\"}",
                     required = true)
-            @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
+            @RequestBody String body){
 
-        userService.sendSMSForPasswordRecovery(body, request, response);
+        userService.sendSMSForPasswordRecovery(body);
 
     }
 
@@ -93,7 +87,7 @@ public class UserController {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Password have changed"),
             @ApiResponse(code = 400, message = "Incorrect JSON"),
-            @ApiResponse(code = 432, message = "User with this :telephoneNumber doesn't exist"),
+            @ApiResponse(code = 400, message = "User with this :telephoneNumber doesn't exist"),
     })
     @PutMapping("/changePassword")
     public void changePassword(
@@ -101,10 +95,8 @@ public class UserController {
                     value = "Телефонный номер и новый пароль",
                     example = "{\n\"telephoneNumber\": \"+79645932177\",\n\"password\": \"newPassword\"}",
                     required = true)
-            @RequestBody String body,
-            HttpServletRequest request,
-            HttpServletResponse response){
-        userService.changePassword(body, request, response);
+            @RequestBody String body){
+        userService.changePassword(body);
     }
 
     @ApiOperation(value = "Проверка роли пользователя (Необходим JWT в хедере запроса)")
