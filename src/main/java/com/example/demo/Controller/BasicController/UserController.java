@@ -129,6 +129,26 @@ public class UserController {
 
     }
 
+    @ApiOperation(value = "Изменение пола (нужен jwt-token)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "Gender was changing"),
+            @ApiResponse(code = 400, message = "Incorrect JSON")
+    })
+    @PutMapping("/changeGender/{gender}")
+    public void changeGender(
+            @ApiParam(type = "Boolean",
+                    value = "Пол, отвечающий на вопрос: Это мужчина? true - мужской, false - женский",
+                    example = "true",
+                    required = true)
+            @PathVariable("gender") String gender,
+            HttpServletRequest request,
+            HttpServletResponse response){
+
+        userService.changeGender(gender, request);
+
+    }
+
     @ApiOperation(value = "Удаление пользователя по telephoneNumber", hidden = true)
     @DeleteMapping("/deleteByTelephoneNumber")
     public void delete(@RequestBody String telephoneNumber){

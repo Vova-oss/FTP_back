@@ -12,9 +12,11 @@ import com.example.demo.Repositories.UserRepository;
 import com.example.demo.Security.Service.JWTokenService;
 import com.example.demo.Singleton.SingletonOne;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -233,4 +235,16 @@ public class UserService {
     }
 
 
+    public void changeGender(String gender, HttpServletRequest request) {
+        String telephoneNumber = jwTokenService.
+                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
+        UserEntity userEntity = userRepository.findByTelephoneNumber(telephoneNumber);
+        if(userEntity == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect jwt-token");
+        }
+
+        userEntity.setIsMan(Boolean.valueOf(gender));
+        userRepository.save(userEntity);
+        StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Gender was changing");
+    }
 }
