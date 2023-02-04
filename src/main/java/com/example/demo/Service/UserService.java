@@ -247,4 +247,16 @@ public class UserService {
         userRepository.save(userEntity);
         StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Gender was changing");
     }
+
+    public void changeFio(String fio, HttpServletRequest request) {
+        String telephoneNumber = jwTokenService.
+                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
+        UserEntity userEntity = userRepository.findByTelephoneNumber(telephoneNumber);
+        if(userEntity == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect jwt-token");
+
+        userEntity.setFIO(fio);
+        userRepository.save(userEntity);
+        StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "FIO has been changed");
+    }
 }

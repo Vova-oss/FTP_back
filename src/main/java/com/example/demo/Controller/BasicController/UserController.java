@@ -132,7 +132,7 @@ public class UserController {
     @ApiOperation(value = "Изменение пола (нужен jwt-token)")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
-            @ApiResponse(code = 201, message = "Gender was changing"),
+            @ApiResponse(code = 201, message = "Gender has been changed"),
             @ApiResponse(code = 400, message = "Incorrect JSON")
     })
     @PutMapping("/changeGender/{gender}")
@@ -142,10 +142,28 @@ public class UserController {
                     example = "true",
                     required = true)
             @PathVariable("gender") String gender,
-            HttpServletRequest request,
-            HttpServletResponse response){
+            HttpServletRequest request){
 
         userService.changeGender(gender, request);
+
+    }
+
+    @ApiOperation(value = "Изменение ФИО (нужен jwt-token)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "FIO has been changed"),
+            @ApiResponse(code = 400, message = "Incorrect JSON")
+    })
+    @PutMapping("/changeFIO/{fio}")
+    public void changeFIO(
+            @ApiParam(type = "String",
+                    value = "Новое ФИО пользователя",
+                    example = "true",
+                    required = true)
+            @PathVariable("fio") String fio,
+            HttpServletRequest request){
+
+        userService.changeFio(fio, request);
 
     }
 
