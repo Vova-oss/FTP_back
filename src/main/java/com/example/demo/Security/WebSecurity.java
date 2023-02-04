@@ -49,6 +49,10 @@ public class WebSecurity extends WebSecurityConfigurerAdapter implements WebMvcC
                 .csrf().disable().authorizeRequests()
 
                 .antMatchers(HttpMethod.DELETE, "/user/deleteByTelephoneNumber").hasAuthority("ADMIN")
+                .antMatchers("/user/checkRole").hasAuthority("USER")
+                .antMatchers("/user/checkPassword/*").hasAuthority("USER")
+                .antMatchers("/user/changeGender/*").hasAuthority("USER")
+                .antMatchers("/user/changeFIO/*").hasAuthority("USER")
                 .antMatchers("/user/**").permitAll()
 
                 .antMatchers("/type/getAll").permitAll()
