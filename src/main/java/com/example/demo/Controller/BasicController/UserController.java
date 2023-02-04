@@ -86,17 +86,18 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 201, message = "Password have changed"),
-            @ApiResponse(code = 400, message = "Incorrect JSON"),
-            @ApiResponse(code = 400, message = "User with this :telephoneNumber doesn't exist"),
+            @ApiResponse(code = 400, message = "Incorrect JSON\n" +
+                    "Incorrect current password"),
     })
     @PutMapping("/changePassword")
     public void changePassword(
             @ApiParam(type = "String",
-                    value = "Телефонный номер и новый пароль",
-                    example = "{\n\"telephoneNumber\": \"+79645932177\",\n\"password\": \"newPassword\"}",
+                    value = "Старый пароль и новый пароль",
+                    example = "{\n\"oldPassword\": \"pass\",\n\"newPassword\": \"newPassword\"}",
                     required = true)
-            @RequestBody String body){
-        userService.changePassword(body);
+            @RequestBody String body,
+            HttpServletRequest request){
+        userService.changePassword(body, request);
     }
 
     @ApiOperation(value = "Проверка роли пользователя (Необходим JWT в хедере запроса)")
@@ -162,10 +163,9 @@ public class UserController {
                     required = true)
             @PathVariable("fio") String fio,
             HttpServletRequest request){
-
         userService.changeFio(fio, request);
-
     }
+
 
     @ApiOperation(value = "Удаление пользователя по telephoneNumber", hidden = true)
     @DeleteMapping("/deleteByTelephoneNumber")

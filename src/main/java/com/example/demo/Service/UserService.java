@@ -197,22 +197,23 @@ public class UserService {
         StaticMethods.createResponse(201, "Code has been sent");
     }
 
-    public void changePassword(String body) {
+    public void changePassword(String body, HttpServletRequest request) {
 
-        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
-        String newPassword = StaticMethods.parsingJson(body, "password");
-        if(newPassword == null || telephoneNumber == null)
-            return;
+        String oldPassword = StaticMethods.parsingJson(body, "oldPassword");
+        String newPassword = StaticMethods.parsingJson(body, "newPassword");
 
-        UserEntity userEntity = findByTelephoneNumber(telephoneNumber);
-        if(userEntity == null){
-            StaticMethods.createResponse(400, "User with this :telephoneNumber doesn't exist");
-            return;
-        }
+        String telephoneNumber = jwTokenService.
+                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
+        UserEntity userEntity = userRepository.findByTelephoneNumber(telephoneNumber);
+        if(userEntity == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect jwt-token");
+
+        if (!bCryptPasswordEncoder.matches(oldPassword, userEntity.getPassword()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect current password");
 
         userEntity.setPassword(bCryptPasswordEncoder.encode(newPassword));
         userRepository.save(userEntity);
-        StaticMethods.createResponse(201, "Password have changed");
+        StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Password have changed");
 
     }
 
