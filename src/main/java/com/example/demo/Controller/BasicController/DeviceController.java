@@ -198,6 +198,12 @@ public class DeviceController {
         return deviceService.getDTOById(id);
     }
 
+    @ApiOperation(value = "Топ 24 новых девайсов")
+    @GetMapping("/getTopDevices")
+    public List<DeviceDTO> getTopDevices(){
+        return deviceService.getTopDevices();
+    }
+
 
 
     // For my tests

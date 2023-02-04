@@ -56,6 +56,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter implements WebMvcC
 
                 .antMatchers("/device/getByParams").permitAll()
                 .antMatchers("/device/getById/**").permitAll()
+                .antMatchers("/device/getTopDevices").permitAll()
                 .antMatchers("/device/**").hasAuthority("ADMIN")
 
                 .antMatchers("/brand/**").hasAuthority("ADMIN")
