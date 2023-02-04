@@ -1,7 +1,6 @@
 package com.example.demo.DTO;
 
 import com.example.demo.Entity.UserEntity;
-import org.springframework.security.core.userdetails.User;
 
 public class UserDTO {
 
@@ -25,12 +24,12 @@ public class UserDTO {
         this.fio = fio;
     }
 
-    public Boolean getMan() {
+    public Boolean getIsMan() {
         return isMan;
     }
 
-    public void setMan(Boolean man) {
-        isMan = man;
+    public void setMan(Boolean isMan) {
+        this.isMan = isMan;
     }
 
     public String getTelephoneNumber() {

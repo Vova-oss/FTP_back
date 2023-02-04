@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.Enum.ERoles;
 import com.example.demo.Entity.Response.ResponseClass;
 import com.example.demo.Entity.Role;
@@ -259,5 +260,12 @@ public class UserService {
         userEntity.setFIO(fio);
         userRepository.save(userEntity);
         StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "FIO has been changed");
+    }
+
+    public UserDTO getInfoAboutUser(HttpServletRequest request) {
+        String telephoneNumber = jwTokenService.
+                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
+        UserEntity userEntity = userRepository.findByTelephoneNumber(telephoneNumber);
+        return UserDTO.createUserDTO(userEntity);
     }
 }

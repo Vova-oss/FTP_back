@@ -1,5 +1,6 @@
 package com.example.demo.Controller.BasicController;
 
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.Response.ResponseClass;
 import com.example.demo.Service.UserService;
 import io.swagger.annotations.*;
@@ -166,6 +167,19 @@ public class UserController {
         userService.changeFio(fio, request);
     }
 
+    @ApiOperation(value = "Получение информации о пользователе (нужен jwt-token)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "FIO has been changed"),
+            @ApiResponse(code = 400, message = "Incorrect JSON")
+    })
+    @GetMapping("/getInfoAboutUser")
+    public UserDTO getInfoAboutUser(
+            HttpServletRequest request){
+
+        return userService.getInfoAboutUser(request);
+
+    }
 
     @ApiOperation(value = "Удаление пользователя по telephoneNumber", hidden = true)
     @DeleteMapping("/deleteByTelephoneNumber")
