@@ -9,6 +9,7 @@ import com.example.demo.Entity.Response.ResponseClass;
 import com.example.demo.Entity.Role;
 import com.example.demo.Entity.UserEntity;
 import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Security.Service.JWTokenService;
 import com.example.demo.Singleton.SingletonOne;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,8 @@ public class UserService {
     ValidationService validationService;
     @Autowired
     SendingSMS sendingSMS;
+    @Autowired
+    JWTokenService jwTokenService;
 
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -218,4 +221,16 @@ public class UserService {
     public void delete(UserEntity userEntity){
         userRepository.delete(userEntity);
     }
+
+    public Boolean checkPassword(String password, HttpServletRequest request) {
+        String telephoneNumber = jwTokenService.
+                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
+        UserEntity userEntity = userRepository.findByTelephoneNumber(telephoneNumber);
+        if(userEntity == null)
+            return false;
+
+        return bCryptPasswordEncoder.matches(password, userEntity.getPassword());
+    }
+
+
 }
