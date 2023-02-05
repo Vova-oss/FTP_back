@@ -427,7 +427,7 @@ public class DeviceService {
     public List<DeviceDTO> getTopDevices() {
         List<Device> list = deviceRepository.findAll();
         list.sort((o1, o2) -> o2.getDataOfCreate().compareTo(o1.getDataOfCreate()));
-        list.subList(0, Math.min(list.size(), 24));
+        list = list.subList(0, Math.min(list.size(), 24));
         return DeviceDTO.createList(list);
     }
 }
