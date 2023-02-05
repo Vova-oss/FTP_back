@@ -13,7 +13,13 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 @Table(name = "os_brand")
-public class Brand extends BaseEntity{
+public class Brand {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "brand_seq")
+    @SequenceGenerator(name = "brand_seq", initialValue = 214, allocationSize = 1)
+    @ApiModelProperty(notes = ":id Бренда", name = "id", required = true, example = "13")
+    private Long id;
 
     @ApiModelProperty(notes = "Название Бренда", name = "name", required = true, example = "Apple")
     @Column(name = "name")

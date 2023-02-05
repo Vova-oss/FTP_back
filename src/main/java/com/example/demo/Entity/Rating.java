@@ -10,7 +10,12 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @Table(name = "os_rating")
-public class Rating extends BaseEntity{
+public class Rating {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = ":id Рейтинга", name = "id", required = true, example = "13")
+    private Long id;
 
     @ApiModelProperty(notes = "Рейтинг", name = "rate", required = true, example = "Хз, ещё не придумали")
     @Column(name = "rate")

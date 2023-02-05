@@ -16,7 +16,13 @@ import java.util.List;
 uniqueConstraints = {
         @UniqueConstraint(columnNames = "name")
 })
-public class Type extends BaseEntity{
+public class Type {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "type_seq")
+    @SequenceGenerator(name = "type_seq", initialValue = 8, allocationSize = 1)
+    @ApiModelProperty(notes = ":id Типа", name = "id", required = true, example = "13")
+    private Long id;
 
     @ApiModelProperty(notes = "Название Типа", name = "name", required = true, example = "Смартфоны")
     @Column(name = "name")

@@ -13,7 +13,12 @@ import javax.validation.constraints.Positive;
 @Data
 @NoArgsConstructor
 @Table(name = "os_order_device")
-public class Order_device extends BaseEntity {
+public class Order_device {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = ":id пользователя", name = "id", required = true, example = "13")
+    private Long id;
 
     @ApiModelProperty(notes = "Ссылка на Заказ", name = "order", required = true)
     @ManyToOne(cascade = {

@@ -148,7 +148,7 @@ public class DeviceService {
             }
             device.setPathFile(fileName);
             device.setIsName(true);
-        }else {
+        }else if(ref!=null) {
             device.setPathFile(ref);
             device.setIsName(false);
         }

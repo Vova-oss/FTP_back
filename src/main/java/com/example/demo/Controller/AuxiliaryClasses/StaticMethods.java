@@ -1,11 +1,9 @@
 package com.example.demo.Controller.AuxiliaryClasses;
 
-import com.example.demo.Entity.BaseEntity;
 import com.example.demo.ReqResContextSettings.ReqResContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.MediaType;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,7 +12,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class StaticMethods {
 
@@ -117,22 +114,22 @@ public class StaticMethods {
 
 
     // Задумка прикольная, жаль, что я даун
-    public static <T extends BaseEntity> T findById(String body,
-                                                    HttpServletRequest request ,
-                                                    HttpServletResponse response,
-                                                    JpaRepository<T, Long> repository){
-
-        String field = parsingJson(body, "id");
-        if (field == null)
-            return null;
-
-        List<T> list = repository.findAll();
-        for (T el : list) {
-            if (field.equals(Objects.toString(el.getId()))) {
-                return el;
-            }
-        }
-        return null;
-    }
+//    public static <T extends BaseEntity> T findById(String body,
+//                                                    HttpServletRequest request ,
+//                                                    HttpServletResponse response,
+//                                                    JpaRepository<T, Long> repository){
+//
+//        String field = parsingJson(body, "id");
+//        if (field == null)
+//            return null;
+//
+//        List<T> list = repository.findAll();
+//        for (T el : list) {
+//            if (field.equals(Objects.toString(el.getId()))) {
+//                return el;
+//            }
+//        }
+//        return null;
+//    }
 
 }

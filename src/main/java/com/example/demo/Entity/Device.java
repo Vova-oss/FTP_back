@@ -20,7 +20,13 @@ import java.util.List;
 @Table(name = "os_device", uniqueConstraints = {
         @UniqueConstraint(columnNames = "name")
 })
-public class Device extends BaseEntity{
+public class Device {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "device_seq")
+    @SequenceGenerator(name = "device_seq", allocationSize = 1, initialValue = 2082)
+    @ApiModelProperty(notes = ":id пользователя", name = "id", required = true, example = "13")
+    private Long id;
 
     @ApiModelProperty(notes = "Название Девайса", name = "name", required = true, example = "EI540-A Чёрный")
     @Column(name = "name")

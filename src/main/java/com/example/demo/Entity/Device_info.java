@@ -11,7 +11,13 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @Table(name = "os_device_info")
-public class Device_info extends BaseEntity{
+public class Device_info {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "device_info_seq")
+    @SequenceGenerator(name = "device_info_seq", initialValue = 14398, allocationSize = 1)
+    @ApiModelProperty(notes = ":id пользователя", name = "id", required = true, example = "13")
+    private Long id;
 
     @ApiModelProperty(notes = "Заголовок", name = "title", required = true, example = "Ширина")
     @Column(name = "title")

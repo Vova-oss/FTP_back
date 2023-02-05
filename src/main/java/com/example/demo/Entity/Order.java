@@ -18,7 +18,12 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Table(name = "os_order")
-public class Order extends BaseEntity{
+public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = ":id пользователя", name = "id", required = true, example = "13")
+    private Long id;
 
     @ApiModelProperty(notes = "Пользователь, к которому относится заказ", name = "user", required = true)
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

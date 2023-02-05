@@ -21,7 +21,12 @@ import java.util.List;
         uniqueConstraints = {
             @UniqueConstraint(columnNames = "telephoneNumber")
         })
-public class UserEntity extends BaseEntity{
+public class UserEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = ":id Пользователя", name = "id", required = true, example = "13")
+    private Long id;
 
     @ApiModelProperty(notes = "Email пользователя", name = "telephoneNumber", required = true, example = "first@mail.ru")
     @NumberFormat

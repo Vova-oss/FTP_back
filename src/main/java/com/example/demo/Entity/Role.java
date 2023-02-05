@@ -13,7 +13,12 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Table(name = "os_role")
-public class Role extends BaseEntity{
+public class Role {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = ":id Роли", name = "id", required = true, example = "13")
+    private Long id;
 
     @ApiModelProperty(notes = "Роль (ERoles)", name = "role", required = true, example = "USER")
     @Enumerated(EnumType.STRING)
