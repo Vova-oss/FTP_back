@@ -3,7 +3,6 @@ package com.example.demo.Service;
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
 import com.example.demo.DTO.DeviceDTO;
 import com.example.demo.Entity.Brand;
-import com.example.demo.Entity.Comparators.DevicePriceComparator;
 import com.example.demo.Entity.Device;
 import com.example.demo.Entity.Device_info;
 import com.example.demo.Entity.Response.DeviceWIthNecessaryParameters;
@@ -20,10 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -250,10 +246,10 @@ public class DeviceService {
 
 
         // Девайс с максимальной ценой в этом листе
-        Optional<Device> deviceWithMaxPrice = list.stream().max(new DevicePriceComparator());
+        Optional<Device> deviceWithMaxPrice = list.stream().max(Comparator.comparing(o -> Integer.valueOf(o.getPrice())));
 
         // Девайс с минимальной ценой в этом листе
-        Optional<Device> deviceWithMinPrice = list.stream().min(new DevicePriceComparator());
+        Optional<Device> deviceWithMinPrice = list.stream().min(Comparator.comparing(o -> Integer.valueOf(o.getPrice())));
 
         list = selectionByPrice(list, minPrice, maxPrice);
 
