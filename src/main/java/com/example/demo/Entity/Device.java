@@ -4,17 +4,15 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.NumberFormat;
 
-import javax.persistence.*;
-import javax.validation.constraints.Min;
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.Date;
-import java.util.List;
 
-@Entity
+
 @Data
 @NoArgsConstructor
 @Table(name = "os_device", uniqueConstraints = {
@@ -23,8 +21,6 @@ import java.util.List;
 public class Device {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "device_seq")
-    @SequenceGenerator(name = "device_seq", allocationSize = 1, initialValue = 2082)
     @ApiModelProperty(notes = ":id пользователя", name = "id", required = true, example = "13")
     private Long id;
 
@@ -53,31 +49,13 @@ public class Device {
 
 
     @ApiModelProperty(notes = "Тип, к которому принадлежит данный Девайс", name = "typeId", required = true)
-    @ManyToOne
-    @JoinColumn(name = "type_id")
-    private Type typeId;
+    @Column(name = "type_id")
+    private Long typeId;
 
 
     @ApiModelProperty(notes = "Бренд, к которому принадлежит данный Девайс", name = "brandId", required = true)
-    @ManyToOne
-    @JoinColumn(name = "brand_id")
-    private Brand brandId;
-
-
-    @ApiModelProperty(notes = "Рейтинг данного девайса", name = "ratings")
-    @OneToMany(mappedBy = "device")
-    private List<Rating> ratings;
-
-
-    @ApiModelProperty(notes = "Дополнительная инфа о Девайсе", name = "deviceInfos")
-    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL)
-    private List<Device_info> deviceInfos;
-
-
-    @ApiModelProperty(notes = "Строки заказов, к которым принадлежит данный Девайс", name = "order_device")
-    @OneToOne(mappedBy = "device")
-    private Order_device order_device;
-
+    @Column(name = "brand_id")
+    private Long brandId;
 
     @ApiModelProperty(notes = "Дата создания Девайса", name = "dataOfCreate", required = true)
     @Column(name = "data_of_create")

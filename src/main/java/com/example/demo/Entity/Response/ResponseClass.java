@@ -3,10 +3,7 @@ package com.example.demo.Entity.Response;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.springframework.security.config.web.servlet.headers.HeadersSecurityMarker;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 
 @Data
@@ -29,5 +26,14 @@ public class ResponseClass implements Serializable {
         this.status = status;
         this.info = info;
         this.path = path;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"status\":\"" + status + "\"," +
+                "\"info\":\"" + info + "\"," +
+                "\"path\":\"" + path + "\"," +
+                '}';
     }
 }

@@ -15,7 +15,6 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
-@Entity
 @NoArgsConstructor
 @Table(name = "os_users",
         uniqueConstraints = {
@@ -24,7 +23,6 @@ import java.util.List;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ApiModelProperty(notes = ":id Пользователя", name = "id", required = true, example = "13")
     private Long id;
 
@@ -41,37 +39,16 @@ public class UserEntity {
     @Column(name = "password")
     private String password;
 
-
-    @ApiModelProperty(notes = "Роли пользователя", name = "roles", required = true)
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "os_roles_user_entities",
-            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")})
-    private List<Role> roles;
-
-
-    @ApiModelProperty(notes = "Заказы пользователя", name = "order")
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Order> order;
-
-
-    @ApiModelProperty(notes = "Рейтинг (оценки для девайсов) пользователя", name = "ratings")
-    @OneToMany(mappedBy = "user")
-    private List<Rating> ratings;
-
-
-    @ApiModelProperty(notes = "RefreshToken пользователя", name = "refreshToken", required = true)
-    @OneToOne(mappedBy = "userEntity")
-    private RefreshToken refreshToken;
-
-
     private String FIO;
+
     private Boolean verification;
 
     @Nullable
     private Boolean isMan;
+
     @Nullable
     private Long timeOfCreation;
+
     @Nullable
     private Integer code;
 

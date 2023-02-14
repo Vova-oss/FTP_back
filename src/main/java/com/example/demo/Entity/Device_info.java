@@ -1,21 +1,19 @@
 package com.example.demo.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-@Entity
 @Data
 @NoArgsConstructor
 @Table(name = "os_device_info")
 public class Device_info {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "device_info_seq")
-    @SequenceGenerator(name = "device_info_seq", initialValue = 14398, allocationSize = 1)
     @ApiModelProperty(notes = ":id пользователя", name = "id", required = true, example = "13")
     private Long id;
 
@@ -30,12 +28,7 @@ public class Device_info {
 
 
     @ApiModelProperty(notes = "Девайс, к которому идёт описание", name = "device", required = true)
-    @JsonIgnore
-    @ManyToOne(cascade = {
-            CascadeType.DETACH,
-            CascadeType.MERGE,
-            CascadeType.REFRESH})
-    @JoinColumn(name = "device_id")
-    private Device device;
+    @Column(name = "device_id")
+    private Long device_id;
 
 }

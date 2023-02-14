@@ -4,42 +4,29 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import javax.validation.constraints.Min;
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
-@Entity
 @Data
 @NoArgsConstructor
 @Table(name = "os_order_device")
 public class Order_device {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ApiModelProperty(notes = ":id пользователя", name = "id", required = true, example = "13")
     private Long id;
 
     @ApiModelProperty(notes = "Ссылка на Заказ", name = "order", required = true)
-    @ManyToOne(cascade = {
-            CascadeType.DETACH,
-            CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.REFRESH
-    })
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @Column(name = "order_id")
+    private Long order_id;
 
 
     @ApiModelProperty(notes = "Девайс в заказе", name = "device", required = true)
-    @OneToOne(cascade = {
-            CascadeType.DETACH,
-            CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.REFRESH
-    })
-    @JoinColumn(name = "device_id")
-    private Device device;
+    @Column(name = "device_id")
+    private Long device_id;
 
 
     @ApiModelProperty(notes = "Количество данного Девайса в заказе", name = "amountOfProduct",
