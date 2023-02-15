@@ -5,7 +5,7 @@
 //import com.auth0.jwt.exceptions.JWTDecodeException;
 //import com.auth0.jwt.exceptions.TokenExpiredException;
 //import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-//import com.example.demo.Entity.Response.ResponseClass;
+//import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
 //import com.example.demo.Security.Service.JWTokenService;
 //import org.springframework.http.ResponseEntity;
 //import org.springframework.security.authentication.AuthenticationManager;

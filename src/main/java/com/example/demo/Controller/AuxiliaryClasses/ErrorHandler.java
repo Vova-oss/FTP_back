@@ -1,24 +1,36 @@
-//package com.example.demo.Controller.AuxiliaryClasses;
-//
-//import com.auth0.jwt.exceptions.TokenExpiredException;
-//import com.example.demo.Entity.Response.ResponseClass;
-//import org.json.JSONException;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.ControllerAdvice;
-//import org.springframework.web.bind.annotation.CrossOrigin;
-//import org.springframework.web.bind.annotation.ExceptionHandler;
-//import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-//
-//import javax.servlet.http.HttpServletRequest;
-//
-//@CrossOrigin("http://localhost:3000")
-//@ControllerAdvice
-//public class ErrorHandler extends ResponseEntityExceptionHandler{
-//
-//    @ExceptionHandler(value = JSONException.class)
-//    public ResponseEntity<ResponseClass> ExceptionOfTokenExpired(HttpServletRequest request){
-//        System.out.println("Incorrect JSON");
-//        return ResponseEntity.status(400).body(new ResponseClass(400, "Incorrect JSON (EX)", request.getServletPath()));
-//    }
-//
-//}
+package com.example.demo.Controller.AuxiliaryClasses;
+
+import org.json.JSONException;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+public class ErrorHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(CustomException.class)
+    public Mono<Void> handle(CustomException e, ServerHttpResponse response){
+
+        ResponseClass body = new ResponseClass();
+        body.setStatus(400);
+        body.setInfo(e.getMessage());
+
+        String strBody = body.toString();
+        byte[] bytes = strBody.getBytes(StandardCharsets.UTF_8);
+        DataBuffer buffer = response.bufferFactory().wrap(bytes);
+        response.setStatusCode(HttpStatus.BAD_REQUEST);
+        return response.writeWith(Flux.just(buffer));
+    }
+
+}

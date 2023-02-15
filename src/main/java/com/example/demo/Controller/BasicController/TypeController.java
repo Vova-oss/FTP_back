@@ -1,6 +1,7 @@
 package com.example.demo.Controller.BasicController;
 
 import com.example.demo.DTO.TypeDTO;
+import com.example.demo.Entity.Type;
 import com.example.demo.Service.TypeService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +21,21 @@ public class TypeController {
     TypeService typeService;
 
 
-//    @ApiOperation(value = "Добавление новогоТипа")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 400, message = "Such Type already exists")
-//    })
-//    @PostMapping("/add")
-//    public void addType(
-//            @ApiParam(
-//                    value = "Наименование Типа",
-//                    example = "{\n\"name\":\"Смартфон\"\n}",
-//                    required = true
-//            )
-//            @RequestBody String typeName)  {
-//        typeService.addType(typeName);
-//    }
+    @ApiOperation(value = "Добавление новогоТипа")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 400, message = "Such Type already exists")
+    })
+    @PostMapping("/add")
+    public Mono<Type> addType(
+            @ApiParam(
+                    value = "Наименование Типа",
+                    example = "{\n\"name\":\"Смартфон\"\n}",
+                    required = true
+            )
+            @RequestBody String typeName)  {
+        return typeService.addType(typeName);
+    }
 
     @ApiOperation(value = "Получение всех Типов и принадлежащих к ним Брендов")
     @GetMapping("/getAll")

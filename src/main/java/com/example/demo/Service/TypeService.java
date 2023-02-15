@@ -1,31 +1,25 @@
 package com.example.demo.Service;
 
+import com.example.demo.Controller.AuxiliaryClasses.CustomException;
 import com.example.demo.DTO.BrandDTO;
 import com.example.demo.DTO.TypeDTO;
-import com.example.demo.Entity.Brand;
-import com.example.demo.Entity.Device;
 import com.example.demo.Entity.Type;
-import com.example.demo.Repositories.BrandDbDtoRepo;
 import com.example.demo.Repositories.BrandRepository;
 import com.example.demo.Repositories.TypeRepository;
-import com.example.demo.dbDTO.BrandDbDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.util.function.Tuple2;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class TypeService {
+
 
     @Autowired
     TypeRepository typeRepository;
@@ -39,29 +33,27 @@ public class TypeService {
 //    DeviceService deviceService;
 
 
-//    /**
-//     * Добавление Типа
-//     * @param name название Типа
-//     * @code 201 - Created
-//     * @code 400 - Such Type already exists
-//     */
-//    public void addType(String name){
-//        Type type;
-//        try {
-//            type = new ObjectMapper().readValue(name, Type.class);
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//            StaticMethods.createResponse(400, "Incorrect JSON");
-//            return;
-//        }
-//
-//        if(!typeRepository.existsByName(type.getName())){
-//            typeRepository.save(type);
-//            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
-//            return;
-//        }
-//        StaticMethods.createResponse( 400, "Such Type already exists");
-//    }
+    /**
+     * Добавление Типа
+     * @param name название Типа
+     * @code 201 - Created
+     * @code 400 - Such Type already exists
+     */
+    @SneakyThrows
+    public Mono<Type> addType(String name){
+        Type type;
+        try {
+            type = new ObjectMapper().readValue(name, Type.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new CustomException("Incorrect JSON");
+        }
+
+        return typeRepository
+                .save(type)
+                .onErrorResume(throwable -> Mono.error(new CustomException("Such Type already exists")));
+
+    }
 
 
     /** Получение абсолютно всех Типов */
@@ -70,7 +62,6 @@ public class TypeService {
     }
 
     public Flux<TypeDTO> getAllAsDTO() {
-
         return getAll()
                 .publishOn(Schedulers.boundedElastic())
                 .map(type -> {
@@ -86,10 +77,6 @@ public class TypeService {
 
                     return typeDTO;
                 });
-
-//        return getAll()
-//                .publishOn(Schedulers.boundedElastic())
-//                .mapNotNull(type -> findTypeById(type.getId()).blockFirst());
     }
 
     public Flux<TypeDTO> findTypeById(Long id) {

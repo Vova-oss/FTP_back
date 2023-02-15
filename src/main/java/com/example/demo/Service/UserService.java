@@ -6,7 +6,7 @@
 //import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
 //import com.example.demo.DTO.UserDTO;
 //import com.example.demo.Entity.Enum.ERoles;
-//import com.example.demo.Entity.Response.ResponseClass;
+//import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
 //import com.example.demo.Entity.Role;
 //import com.example.demo.Entity.UserEntity;
 //import com.example.demo.Repositories.UserRepository;

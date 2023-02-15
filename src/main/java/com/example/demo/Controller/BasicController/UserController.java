@@ -1,7 +1,7 @@
 //package com.example.demo.Controller.BasicController;
 //
 //import com.example.demo.DTO.UserDTO;
-//import com.example.demo.Entity.Response.ResponseClass;
+//import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
 //import com.example.demo.Service.UserService;
 //import io.swagger.annotations.*;
 //import org.springframework.beans.factory.annotation.Autowired;
