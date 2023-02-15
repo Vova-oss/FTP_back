@@ -13,4 +13,5 @@ public interface BrandRepository extends ReactiveCrudRepository<Brand, Long> {
     Mono<Brand> findByNameAndTypeId(String name, Long typeId);
     Flux<Brand> findAllByTypeId(Long typeId);
 
+    Mono<Void> deleteByTypeId(Long id);
 }

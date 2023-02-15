@@ -1,26 +1,12 @@
-//package com.example.demo.Controller.AuxiliaryClasses;
-//
-//import com.example.demo.ReqResContextSettings.ReqResContext;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import org.json.JSONException;
-//import org.json.JSONObject;
-//import org.springframework.http.MediaType;
-//import org.springframework.http.server.reactive.ServerHttpRequest;
-//import org.springframework.http.server.reactive.ServerHttpResponse;
-//import org.springframework.web.reactive.function.server.ServerRequest;
-//import org.springframework.web.reactive.function.server.ServerResponse;
-//import springfox.documentation.service.Server;
-//
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
-//import java.io.IOException;
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
-//
-//public class StaticMethods {
-//
-//
+package com.example.demo.Controller.AuxiliaryClasses;
+
+import lombok.SneakyThrows;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class StaticMethods {
+
+
 //    /**
 //     * Создание ответа
 //     * @param status - статус ответа
@@ -83,59 +69,60 @@
 //        }
 //
 //    }
+
+    /**
+     * Получение конкретного поля из json
+     * @param body - изначальный json
+     * @param field - поле, которое необходимо получить из этого json
+     * @return field/null
+     *
+     * @code 400 - Incorrect JSON
+     */
+    @SneakyThrows
+    public static String parsingJson (String body,
+                                      String field) {
+        try {
+            JSONObject jsonObject = new JSONObject(body);
+            field = jsonObject.getString(field);
+        } catch (JSONException e) {
+            throw new CustomException("Incorrect JSON");
+        }
+        return field;
+    }
+
+
+    /** метод определения расширения файла */
+    public static String getFileExtension(String fileName) {
+        // если в имени файла есть точка и она не является первым символом в названии файла
+        if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+            // то вырезаем все знаки после последней точки в названии файла, то есть ХХХХХ.txt -> txt
+            return fileName.substring(fileName.lastIndexOf(".")+1);
+            // в противном случае возвращаем заглушку, то есть расширение не найдено
+        else return null;
+    }
+
+
+
+
+
+
+    // Задумка прикольная, жаль, что я даун
+//    public static <T extends BaseEntity> T findById(String body,
+//                                                    HttpServletRequest request ,
+//                                                    HttpServletResponse response,
+//                                                    JpaRepository<T, Long> repository){
 //
-//    /**
-//     * Получение конкретного поля из json
-//     * @param body - изначальный json
-//     * @param field - поле, которое необходимо получить из этого json
-//     * @return field/null
-//     *
-//     * @code 400 - Incorrect JSON
-//     */
-//    public static String parsingJson (String body,
-//                                      String field) {
-//        try {
-//            JSONObject jsonObject = new JSONObject(body);
-//            field = jsonObject.getString(field);
-//        } catch (JSONException e) {
+//        String field = parsingJson(body, "id");
+//        if (field == null)
 //            return null;
+//
+//        List<T> list = repository.findAll();
+//        for (T el : list) {
+//            if (field.equals(Objects.toString(el.getId()))) {
+//                return el;
+//            }
 //        }
-//        return field;
+//        return null;
 //    }
-//
-//
-//    /** метод определения расширения файла */
-//    public static String getFileExtension(String fileName) {
-//        // если в имени файла есть точка и она не является первым символом в названии файла
-//        if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
-//            // то вырезаем все знаки после последней точки в названии файла, то есть ХХХХХ.txt -> txt
-//            return fileName.substring(fileName.lastIndexOf(".")+1);
-//            // в противном случае возвращаем заглушку, то есть расширение не найдено
-//        else return null;
-//    }
-//
-//
-//
-//
-//
-//
-//    // Задумка прикольная, жаль, что я даун
-////    public static <T extends BaseEntity> T findById(String body,
-////                                                    HttpServletRequest request ,
-////                                                    HttpServletResponse response,
-////                                                    JpaRepository<T, Long> repository){
-////
-////        String field = parsingJson(body, "id");
-////        if (field == null)
-////            return null;
-////
-////        List<T> list = repository.findAll();
-////        for (T el : list) {
-////            if (field.equals(Objects.toString(el.getId()))) {
-////                return el;
-////            }
-////        }
-////        return null;
-////    }
-//
-//}
+
+}

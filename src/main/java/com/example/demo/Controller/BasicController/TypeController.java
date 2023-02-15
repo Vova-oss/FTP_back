@@ -44,22 +44,22 @@ public class TypeController {
     }
 
 
-//    @ApiOperation(value = "Удаление Типа по :id")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 204, message = "No Content"),
-//            @ApiResponse(code = 400, message = "There isn't exist Type with this :id")
-//    })
-//    @DeleteMapping("/delete")
-//    public void deleteType(
-//            @ApiParam(
-//                    value = ":id Типа, который необходимо удалить",
-//                    example = "{\n\"id\":\"5\"\n}",
-//                    required = true
-//            )
-//            @RequestBody String body){
-//        typeService.deleteType(body);
-//    }
+    @ApiOperation(value = "Удаление Типа по :id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 204, message = "No Content"),
+            @ApiResponse(code = 400, message = "There isn't exist Type with this :id")
+    })
+    @DeleteMapping("/delete")
+    public Mono<Void> deleteType(
+            @ApiParam(
+                    value = ":id Типа, который необходимо удалить",
+                    example = "{\n\"id\":\"5\"\n}",
+                    required = true
+            )
+            @RequestBody String body){
+       return typeService.deleteType(body);
+    }
 //
 //
 //    @ApiOperation(value = "Изменение Типа")

@@ -1,6 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.Controller.AuxiliaryClasses.CustomException;
+import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
 import com.example.demo.DTO.BrandDTO;
 import com.example.demo.DTO.TypeDTO;
 import com.example.demo.Entity.Type;
@@ -116,18 +117,25 @@ public class TypeService {
     }
 
 
-//    /**
-//     * Удаление Типа по его :id
-//     * @param body [json] содержит :id Типа
-//     * @code 204 - No Content
-//     * @code 400 - Incorrect JSON
-//     * @code 400 - There isn't exist Type with this :id
-//     */
-//    public void deleteType(String body) {
-//
-//        String id = StaticMethods.parsingJson(body, "id");
-//        if(id == null)
-//            return;
+    /**
+     * Удаление Типа по его :id
+     * @param body [json] содержит :id Типа
+     * @code 204 - No Content
+     * @code 400 - Incorrect JSON
+     * @code 400 - There isn't exist Type with this :id
+     */
+    public Mono<Void> deleteType(String body) {
+
+        Long id = Long.valueOf(StaticMethods.parsingJson(body, "id"));
+
+        return typeRepository
+                .findById(id)
+                .switchIfEmpty(Mono.error(new CustomException("There isn't exist Type with this :id")))
+                .flatMap(type -> typeRepository
+                        .deleteById(id)
+                        .onErrorResume(throwable -> Mono.error(new CustomException("Type has some connections. Delete the linking objects")))
+                );
+
 //        Type type = typeRepository.findById(Long.valueOf(id)).orElse(null);
 //
 //        if(type!=null) {
@@ -139,12 +147,12 @@ public class TypeService {
 //                    new File(System.getProperty("user.dir").replace("\\","/") + "/src/main/resources/static/images/" + device.getPathFile()).delete();
 //            }
 //
-//            typeRepository.delete(type);
+//            return typeRepository.deleteById(Long.valueOf(id));
 //            StaticMethods.createResponse(HttpServletResponse.SC_NO_CONTENT, "No Content");
 //        }
 //
 //        StaticMethods.createResponse( 400, "There isn't exist Type with this :id");
-//    }
+    }
 //
 //
 //    /**
