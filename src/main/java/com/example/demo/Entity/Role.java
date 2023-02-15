@@ -1,11 +1,11 @@
 package com.example.demo.Entity;
 
-import com.example.demo.Entity.Enum.ERoles;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 @Data
 @NoArgsConstructor
@@ -17,8 +17,7 @@ public class Role {
     private Long id;
 
     @ApiModelProperty(notes = "Роль (ERoles)", name = "role", required = true, example = "USER")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role")
-    private ERoles role;
+    @Column(value = "role")
+    private String role;
 
 }

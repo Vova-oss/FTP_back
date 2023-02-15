@@ -3,10 +3,9 @@ package com.example.demo.Entity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 @Data
 @NoArgsConstructor
@@ -18,11 +17,11 @@ public class Brand {
     private Long id;
 
     @ApiModelProperty(notes = "Название Бренда", name = "name", required = true, example = "Apple")
-    @Column(name = "name")
+    @Column(value = "name")
     private String name;
 
     @ApiModelProperty(notes = "Тип, к которому принадлежит данный Бренд", name = "typeId", required = true)
-    @Column(name = "type_id")
+    @Column(value = "type_id")
     private Long typeId;
 
 }

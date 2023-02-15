@@ -3,10 +3,10 @@ package com.example.demo.Entity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
@@ -20,12 +20,12 @@ public class Order_device {
     private Long id;
 
     @ApiModelProperty(notes = "Ссылка на Заказ", name = "order", required = true)
-    @Column(name = "order_id")
+    @Column(value = "order_id")
     private Long orderId;
 
 
     @ApiModelProperty(notes = "Девайс в заказе", name = "device", required = true)
-    @Column(name = "device_id")
+    @Column(value = "device_id")
     private Long deviceId;
 
 
@@ -33,7 +33,7 @@ public class Order_device {
             required = true, example = "7")
     @Positive(message = "Некорректное количество продуктов")
     @NotNull(message = "Некорректное количество продуктов")
-    @Column(name = "amount_of_product")
+    @Column(value = "amount_of_product")
     private Long amountOfProduct;
 
 }

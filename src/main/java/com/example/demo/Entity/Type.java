@@ -3,18 +3,13 @@ package com.example.demo.Entity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 @Data
 @NoArgsConstructor
-@Table(name = "os_type",
-uniqueConstraints = {
-        @UniqueConstraint(columnNames = "name")
-})
+@Table(name = "os_type")
 public class Type {
 
     @Id
@@ -22,7 +17,7 @@ public class Type {
     private Long id;
 
     @ApiModelProperty(notes = "Название Типа", name = "name", required = true, example = "Смартфоны")
-    @Column(name = "name")
+    @Column(value = "name")
     private String name;
 
 }
