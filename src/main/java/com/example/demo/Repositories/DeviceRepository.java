@@ -1,20 +1,18 @@
 package com.example.demo.Repositories;
 
-import com.example.demo.Entity.Brand;
 import com.example.demo.Entity.Device;
-import com.example.demo.Entity.Type;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface DeviceRepository extends JpaRepository<Device, Long> {
+public interface DeviceRepository extends ReactiveCrudRepository<Device, Long> {
 
-    Boolean existsByName(String name);
-    List<Device> findAllByTypeIdAndBrandId(Type typeId, Brand brandId);
-    List<Device> findAllByTypeId(Type typeId);
-    List<Device> findAllByBrandId(Brand brandId);
-    Device findByName(String name);
+    Mono<Boolean> existsByName(String name);
+    Flux<Device> findAllByTypeIdAndBrandId(Long typeId, Long brandId);
+    Flux<Device> findAllByTypeId(Long typeId);
+    Flux<Device> findAllByBrandId(Long brandId);
+    Mono<Device> findByName(String name);
 
 }

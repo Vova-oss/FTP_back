@@ -21,7 +21,7 @@ public class Order {
 
     @ApiModelProperty(notes = "Пользователь, к которому относится заказ", name = "user", required = true)
     @Column(name = "user_id")
-    private Long user_id;
+    private Long userId;
 
     @ApiModelProperty(notes = "Статус заказа (ACTIVE/INACTIVE)", name = "status", required = true, example = "ACTIVE")
     @Enumerated(EnumType.STRING)

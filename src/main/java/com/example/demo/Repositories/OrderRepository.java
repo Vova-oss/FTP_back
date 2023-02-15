@@ -1,15 +1,13 @@
 package com.example.demo.Repositories;
 
 import com.example.demo.Entity.Order;
-import com.example.demo.Entity.UserEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
 
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends ReactiveCrudRepository<Order, Long> {
 
-    List<Order> findAllByUser(UserEntity user);
+    Flux<Order> findAllByUserId(Long user_id);
 
 }

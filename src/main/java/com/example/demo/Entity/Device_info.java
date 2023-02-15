@@ -29,6 +29,6 @@ public class Device_info {
 
     @ApiModelProperty(notes = "Девайс, к которому идёт описание", name = "device", required = true)
     @Column(name = "device_id")
-    private Long device_id;
+    private Long deviceId;
 
 }

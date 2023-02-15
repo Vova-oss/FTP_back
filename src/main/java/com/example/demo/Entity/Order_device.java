@@ -21,12 +21,12 @@ public class Order_device {
 
     @ApiModelProperty(notes = "Ссылка на Заказ", name = "order", required = true)
     @Column(name = "order_id")
-    private Long order_id;
+    private Long orderId;
 
 
     @ApiModelProperty(notes = "Девайс в заказе", name = "device", required = true)
     @Column(name = "device_id")
-    private Long device_id;
+    private Long deviceId;
 
 
     @ApiModelProperty(notes = "Количество данного Девайса в заказе", name = "amountOfProduct",
