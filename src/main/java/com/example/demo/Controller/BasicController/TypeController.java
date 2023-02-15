@@ -1,30 +1,25 @@
-//package com.example.demo.Controller.BasicController;
-//
-//import com.example.demo.DTO.TypeDTO;
-//import com.example.demo.Entity.Type;
-//import com.example.demo.Service.TypeService;
-//import com.fasterxml.jackson.core.type.TypeReference;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import io.swagger.annotations.*;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.web.bind.annotation.*;
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
-//import java.io.File;
-//import java.io.IOException;
-//import java.net.URL;
-//import java.util.List;
-//
-//@Api(tags = "Type")
-//@RestController
-//@RequestMapping("/type")
-//@CrossOrigin("http://localhost:3000")
-//public class TypeController {
-//
-//    @Autowired
-//    TypeService typeService;
-//
-//
+package com.example.demo.Controller.BasicController;
+
+import com.example.demo.DTO.TypeDTO;
+import com.example.demo.Service.TypeService;
+import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+@Api(tags = "Type")
+@RestController
+@RequestMapping("/type")
+@CrossOrigin("http://localhost:3000")
+public class TypeController {
+
+    @Autowired
+    TypeService typeService;
+
+
 //    @ApiOperation(value = "Добавление новогоТипа")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),
@@ -40,14 +35,14 @@
 //            @RequestBody String typeName)  {
 //        typeService.addType(typeName);
 //    }
-//
-//    @ApiOperation(value = "Получение всех Типов и принадлежащих к ним Брендов")
-//    @GetMapping("/getAll")
-//    public List<TypeDTO> getAll(){
-//        return TypeDTO.createList(typeService.getAll());
-//    }
-//
-//
+
+    @ApiOperation(value = "Получение всех Типов и принадлежащих к ним Брендов")
+    @GetMapping("/getAll")
+    public Flux<TypeDTO> getAll(){
+        return typeService.getAllAsDTO();
+    }
+
+
 //    @ApiOperation(value = "Удаление Типа по :id")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),
@@ -82,6 +77,6 @@
 //            @RequestBody String body){
 //        typeService.editType(body);
 //    }
-//
-//
-//}
+
+
+}

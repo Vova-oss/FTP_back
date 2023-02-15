@@ -1,29 +1,44 @@
-//package com.example.demo.Service;
-//
-//import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-//import com.example.demo.Entity.Device;
-//import com.example.demo.Entity.Type;
-//import com.example.demo.Repositories.TypeRepository;
-//import com.fasterxml.jackson.core.JsonProcessingException;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//import reactor.core.publisher.Mono;
-//
-//import javax.servlet.http.HttpServletResponse;
-//import java.io.File;
-//import java.util.List;
-//
-//@Service
-//public class TypeService {
-//
+package com.example.demo.Service;
+
+import com.example.demo.DTO.BrandDTO;
+import com.example.demo.DTO.TypeDTO;
+import com.example.demo.Entity.Brand;
+import com.example.demo.Entity.Device;
+import com.example.demo.Entity.Type;
+import com.example.demo.Repositories.BrandDbDtoRepo;
+import com.example.demo.Repositories.BrandRepository;
+import com.example.demo.Repositories.TypeRepository;
+import com.example.demo.dbDTO.BrandDbDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class TypeService {
+
+    @Autowired
+    TypeRepository typeRepository;
+    @Autowired
+    BrandRepository brandRepository;
+
 //    @Autowired
-//    TypeRepository typeRepository;
-//
+//    BrandService brandService;
+
 //    @Autowired
 //    DeviceService deviceService;
-//
-//
+
+
 //    /**
 //     * Добавление Типа
 //     * @param name название Типа
@@ -47,22 +62,73 @@
 //        }
 //        StaticMethods.createResponse( 400, "Such Type already exists");
 //    }
-//
-//
-//    /** Получение абсолютно всех Типов */
-//    public List<Type> getAll() {
-//        return typeRepository.findAll();
-//    }
-//
-//    /**
-//     * Получение Типа по его названию
-//     * @param typeName название Типа
-//     */
-//    public Mono<Type> findByName(String typeName) {
-//        return typeRepository.findByName(typeName);
-//    }
-//
-//
+
+
+    /** Получение абсолютно всех Типов */
+    public Flux<Type> getAll() {
+        return typeRepository.findAll();
+    }
+
+    public Flux<TypeDTO> getAllAsDTO() {
+
+        return getAll()
+                .publishOn(Schedulers.boundedElastic())
+                .map(type -> {
+                    TypeDTO typeDTO = new TypeDTO();
+                    typeDTO.setId(type.getId());
+                    typeDTO.setName(type.getName());
+
+                    brandRepository
+                            .findAllByTypeId(type.getId())
+                            .map(BrandDTO::create)
+                            .collectList()
+                            .map(brandDTOS -> {typeDTO.setBrands(brandDTOS);return brandDTOS;}).block();
+
+                    return typeDTO;
+                });
+
+//        return getAll()
+//                .publishOn(Schedulers.boundedElastic())
+//                .mapNotNull(type -> findTypeById(type.getId()).blockFirst());
+    }
+
+    public Flux<TypeDTO> findTypeById(Long id) {
+
+        Mono<List<BrandDTO>> brandDTOMono =  brandRepository
+                .findAllByTypeId(id)
+                .map(BrandDTO::create)
+                .collectList();
+
+        Mono<TypeDTO> typeMono = typeRepository
+                .findById(id)
+                .map(type -> {
+                    TypeDTO typeDTO = new TypeDTO();
+                    typeDTO.setId(type.getId());
+                    typeDTO.setName(type.getName());
+                    return typeDTO;
+                });
+
+        return typeMono
+                .zipWith(brandDTOMono)
+                .map(tuple2 ->{
+                    TypeDTO type = tuple2.getT1();
+                    List<BrandDTO> brandDTOS = tuple2.getT2();
+                    type.setBrands(brandDTOS);
+                    return type;
+        }).flux();
+
+    }
+
+
+    /**
+     * Получение Типа по его названию
+     * @param typeName название Типа
+     */
+    public Mono<Type> findByName(String typeName) {
+        return typeRepository.findByName(typeName);
+    }
+
+
 //    /**
 //     * Удаление Типа по его :id
 //     * @param body [json] содержит :id Типа
@@ -119,9 +185,7 @@
 //
 //        StaticMethods.createResponse( 400, "There isn't exist Type with this :id");
 //    }
-//
-//
-//
-//
-//
-//}
+
+
+
+}

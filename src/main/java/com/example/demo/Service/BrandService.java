@@ -1,33 +1,28 @@
-//package com.example.demo.Service;
-//
-//import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-//import com.example.demo.Entity.Brand;
-//import com.example.demo.Entity.Device;
-//import com.example.demo.Entity.Type;
-//import com.example.demo.Repositories.BrandRepository;
-//import org.json.JSONException;
-//import org.json.JSONObject;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.stereotype.Service;
-//import org.springframework.web.reactive.function.server.ServerResponse;
-//import org.springframework.web.server.ResponseStatusException;
-//import reactor.core.publisher.Mono;
-//
-//import java.io.File;
-//import java.util.List;
-//
-//@Service
-//public class BrandService {
-//
-//    @Autowired
-//    BrandRepository brandRepository;
-//
+package com.example.demo.Service;
+
+import com.example.demo.Entity.Brand;
+import com.example.demo.Repositories.BrandRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+
+@Service
+public class BrandService {
+
+    @Autowired
+    BrandRepository brandRepository;
+
 //    @Autowired
 //    TypeService typeService;
 //    @Autowired
 //    DeviceService deviceService;
 //
+
+    public Flux<Brand> getAllByTypeId(Long typeId){
+        return brandRepository.findAllByTypeId(typeId);
+    }
+
+
 //
 //    /**
 //     * Добавление нового Бренда
@@ -138,4 +133,4 @@
 //
 //        StaticMethods.createResponse( 400, "There isn't exist Brand with this id");
 //    }
-//}
+}
