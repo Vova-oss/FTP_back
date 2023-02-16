@@ -27,13 +27,6 @@ public class TypeService {
     @Autowired
     BrandRepository brandRepository;
 
-//    @Autowired
-//    BrandService brandService;
-
-//    @Autowired
-//    DeviceService deviceService;
-
-
     /**
      * Добавление Типа
      * @param name название Типа
@@ -53,7 +46,6 @@ public class TypeService {
         return typeRepository
                 .save(type)
                 .onErrorResume(throwable -> Mono.error(new CustomException("Such Type already exists")));
-
     }
 
 
@@ -81,7 +73,6 @@ public class TypeService {
     }
 
     public Flux<TypeDTO> findTypeById(Long id) {
-
         Mono<List<BrandDTO>> brandDTOMono =  brandRepository
                 .findAllByTypeId(id)
                 .map(BrandDTO::create)
@@ -104,9 +95,7 @@ public class TypeService {
                     type.setBrands(brandDTOS);
                     return type;
         }).flux();
-
     }
-
 
     /**
      * Получение Типа по его названию
@@ -116,7 +105,6 @@ public class TypeService {
         return typeRepository.findByName(typeName);
     }
 
-
     /**
      * Удаление Типа по его :id
      * @param body [json] содержит :id Типа
@@ -125,7 +113,6 @@ public class TypeService {
      * @code 400 - There isn't exist Type with this :id
      */
     public Mono<Void> deleteType(String body) {
-
         Long id = Long.valueOf(StaticMethods.parsingJson(body, "id"));
 
         return typeRepository
@@ -135,9 +122,7 @@ public class TypeService {
                         .deleteById(id)
                         .onErrorResume(throwable -> Mono.error(new CustomException("Type has some connections. Delete the linking objects")))
                 );
-
     }
-
 
     /**
      * Изменение Типа по его :id
@@ -149,9 +134,9 @@ public class TypeService {
      * @code 400 There isn't exist Type with this :id
      */
     public Mono<Void> editType(String body) {
-
         Long id = Long.valueOf(StaticMethods.parsingJson(body, "id"));
         String name = StaticMethods.parsingJson(body,"name");
+
         return typeRepository
                 .findById(id)
                 .switchIfEmpty(Mono.error(new CustomException("There isn't exist Type with this :id")))
@@ -162,26 +147,6 @@ public class TypeService {
                             .onErrorResume(throwable -> Mono.error(new CustomException("Such Type already exists")));
                 })
                 .then(Mono.empty());
-
-
-
-
-
-//        String id = StaticMethods.parsingJson(body, "id");
-//        if(id == null)
-//            return;
-//        Type type = typeRepository.findById(Long.valueOf(id)).orElse(null);
-//
-//        if(type != null){
-//            String name = StaticMethods.parsingJson(body,"name");
-//            type.setName(name);
-//            typeRepository.save(type);
-//            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
-//        }
-//
-//        StaticMethods.createResponse( 400, "There isn't exist Type with this :id");
     }
-
-
 
 }
