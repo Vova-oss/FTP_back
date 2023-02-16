@@ -136,22 +136,6 @@ public class TypeService {
                         .onErrorResume(throwable -> Mono.error(new CustomException("Type has some connections. Delete the linking objects")))
                 );
 
-//        Type type = typeRepository.findById(Long.valueOf(id)).orElse(null);
-//
-//        if(type!=null) {
-//
-//            // Поиск всех девайсов для удаления картинок из static/images
-//            List<Device> list = deviceService.findAllByTypeId(type);
-//            for(Device device: list){
-//                if(device.getIsName())
-//                    new File(System.getProperty("user.dir").replace("\\","/") + "/src/main/resources/static/images/" + device.getPathFile()).delete();
-//            }
-//
-//            return typeRepository.deleteById(Long.valueOf(id));
-//            StaticMethods.createResponse(HttpServletResponse.SC_NO_CONTENT, "No Content");
-//        }
-//
-//        StaticMethods.createResponse( 400, "There isn't exist Type with this :id");
     }
 //
 //

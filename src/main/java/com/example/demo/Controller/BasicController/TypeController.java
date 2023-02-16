@@ -5,6 +5,7 @@ import com.example.demo.Entity.Type;
 import com.example.demo.Service.TypeService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,10 +24,11 @@ public class TypeController {
 
     @ApiOperation(value = "Добавление новогоТипа")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "---"),
             @ApiResponse(code = 400, message = "Such Type already exists")
     })
     @PostMapping("/add")
+    @ResponseStatus(HttpStatus.CREATED)
     public Mono<Type> addType(
             @ApiParam(
                     value = "Наименование Типа",
@@ -51,6 +53,7 @@ public class TypeController {
             @ApiResponse(code = 400, message = "There isn't exist Type with this :id")
     })
     @DeleteMapping("/delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteType(
             @ApiParam(
                     value = ":id Типа, который необходимо удалить",
