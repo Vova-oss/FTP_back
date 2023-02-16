@@ -97,28 +97,29 @@ public class BrandService {
     }
 
 
-//    /**
-//     * Изменение существующего Бренда по :id
-//     *
-//     * @param body [json] :id Бренда и его новое наименование (name)
-//     *
-//     * @code 201 - Created
-//     * @code 400 - Incorrect JSON
-//     * @code 400 - There isn't exist Brand with this id
-//     */
-//    public void editBrand(String body){
-//        String id = StaticMethods.parsingJson(body, "id");
-//        String name = StaticMethods.parsingJson(body, "name");
-//        if(id==null||name==null)
-//            return;
-//
-//        Brand brand = brandRepository.findById(Long.valueOf(id)).orElse(null);
-//        if(brand!=null){
-//            brand.setName(name);
-//            brandRepository.save(brand);
-//            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
-//        }
-//
-//        StaticMethods.createResponse( 400, "There isn't exist Brand with this id");
-//    }
+    /**
+     * Изменение существующего Бренда по :id
+     *
+     * @param body [json] :id Бренда и его новое наименование (name)
+     *
+     * @code 201 - Created
+     * @code 400 - Incorrect JSON
+     * @code 400 - There isn't exist Brand with this id
+     * @code 400 - Such Brand of this Type already exist
+     */
+    public Mono<Void> editBrand(String body){
+        Long id = Long.valueOf(StaticMethods.parsingJson(body, "id"));
+        String name = StaticMethods.parsingJson(body, "name");
+
+        return brandRepository
+                .findById(id)
+                .switchIfEmpty(Mono.error(new CustomException("There isn't exist Brand with this id")))
+                .flatMap(brand -> {
+                    brand.setName(name);
+                    return brandRepository
+                            .save(brand)
+                            .onErrorResume(throwable -> Mono.error(new CustomException("Such Brand of this Type already exist")));
+                })
+                .then(Mono.empty());
+    }
 }

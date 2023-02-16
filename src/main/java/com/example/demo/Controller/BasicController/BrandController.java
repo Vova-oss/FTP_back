@@ -52,19 +52,21 @@ public class BrandController {
         return brandService.deleteBrand(body);
     }
 
-//    @ApiOperation(value = "Редактирование бренда")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 201, message = "Created"),
-//            @ApiResponse(code = 400, message = "There isn't exist Brand with this id")
-//    })
-//    @PutMapping("/edit")
-//    public void editBrand(
-//            @ApiParam(value = ":id бренда, который мы хотим редактировать, новое имя",
-//                      example = "{\n\"id\":\"5\"\n,\n\"name\":\"Apple\"\n}",
-//                      required = true)
-//            @RequestBody String body){
-//        brandService.editBrand(body);
-//    }
+    @ApiOperation(value = "Редактирование бренда")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 400, message = "There isn't exist Brand with this id"),
+            @ApiResponse(code = 400, message = "Such Brand of this Type already exist")
+    })
+    @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping("/edit")
+    public Mono<Void> editBrand(
+            @ApiParam(value = ":id бренда, который мы хотим редактировать, новое имя",
+                      example = "{\n\"id\":\"5\"\n,\n\"name\":\"Apple\"\n}",
+                      required = true)
+            @RequestBody String body){
+        return brandService.editBrand(body);
+    }
 
 }
