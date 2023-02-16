@@ -35,21 +35,23 @@ public class BrandController {
     }
 
 
-//    @ApiOperation(value = "Удаление бренда")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 204, message = "No Content"),
-//            @ApiResponse(code = 400, message = "There isn't exist Brand with this id")
-//    })
-//    @DeleteMapping("/delete")
-//    public void deleteBrand(
-//            @ApiParam(value = ":id бренда, который мы хотим удалить",
-//                      example = "{\n\"id\":\"5\"\n}",
-//                      required = true)
-//            @RequestBody String body){
-//        brandService.deleteBrand(body);
-//    }
-//
+    @ApiOperation(value = "Удаление бренда")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 204, message = "No Content"),
+            @ApiResponse(code = 400, message = "There isn't exist Brand with this id"),
+            @ApiResponse(code = 400, message = "Brand has some connections. Delete the linking objects")
+    })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/delete")
+    public Mono<Void> deleteBrand(
+            @ApiParam(value = ":id бренда, который мы хотим удалить",
+                      example = "{\n\"id\":\"5\"\n}",
+                      required = true)
+            @RequestBody String body){
+        return brandService.deleteBrand(body);
+    }
+
 //    @ApiOperation(value = "Редактирование бренда")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),
