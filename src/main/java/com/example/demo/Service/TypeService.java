@@ -137,19 +137,36 @@ public class TypeService {
                 );
 
     }
-//
-//
-//    /**
-//     * Изменение Типа по его :id
-//     * @param body [json] содержит:
-//     *             id - :id Типа, который желаем изменить
-//     *             name - новое название Типа
-//     * @code 201 - Created
-//     * @code 400 - Incorrect JSON
-//     * @code 400 There isn't exist Type with this :id
-//     */
-//    public void editType(String body) {
-//
+
+
+    /**
+     * Изменение Типа по его :id
+     * @param body [json] содержит:
+     *             id - :id Типа, который желаем изменить
+     *             name - новое название Типа
+     * @code 201 - Created
+     * @code 400 - Incorrect JSON
+     * @code 400 There isn't exist Type with this :id
+     */
+    public Mono<Void> editType(String body) {
+
+        Long id = Long.valueOf(StaticMethods.parsingJson(body, "id"));
+        String name = StaticMethods.parsingJson(body,"name");
+        return typeRepository
+                .findById(id)
+                .switchIfEmpty(Mono.error(new CustomException("There isn't exist Type with this :id")))
+                .flatMap(type -> {
+                    type.setName(name);
+                    return typeRepository
+                            .save(type)
+                            .onErrorResume(throwable -> Mono.error(new CustomException("Such Type already exists")));
+                })
+                .then(Mono.empty());
+
+
+
+
+
 //        String id = StaticMethods.parsingJson(body, "id");
 //        if(id == null)
 //            return;
@@ -163,7 +180,7 @@ public class TypeService {
 //        }
 //
 //        StaticMethods.createResponse( 400, "There isn't exist Type with this :id");
-//    }
+    }
 
 
 

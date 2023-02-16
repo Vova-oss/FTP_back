@@ -50,7 +50,8 @@ public class TypeController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),
             @ApiResponse(code = 204, message = "No Content"),
-            @ApiResponse(code = 400, message = "There isn't exist Type with this :id")
+            @ApiResponse(code = 400, message = "There isn't exist Type with this :id"),
+            @ApiResponse(code = 400, message = "Type has some connections. Delete the linking objects")
     })
     @DeleteMapping("/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -63,24 +64,26 @@ public class TypeController {
             @RequestBody String body){
        return typeService.deleteType(body);
     }
-//
-//
-//    @ApiOperation(value = "Изменение Типа")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 201, message = "Created"),
-//            @ApiResponse(code = 400, message = "There isn't exist Type with this :id")
-//    })
-//    @PutMapping("/edit")
-//    public void editType(
-//            @ApiParam(
-//                    value = ":id Типа и его новое имя",
-//                    example = "{\n\"id\":\"5\",\n\"name\":\"Холодильник\"\n}",
-//                    required = true
-//            )
-//            @RequestBody String body){
-//        typeService.editType(body);
-//    }
+
+
+    @ApiOperation(value = "Изменение Типа")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 400, message = "There isn't exist Type with this :id"),
+            @ApiResponse(code = 400, message = "Such Type already exists")
+    })
+    @PutMapping("/edit")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> editType(
+            @ApiParam(
+                    value = ":id Типа и его новое имя",
+                    example = "{\n\"id\":\"5\",\n\"name\":\"Холодильник\"\n}",
+                    required = true
+            )
+            @RequestBody String body){
+        return typeService.editType(body);
+    }
 
 
 }
