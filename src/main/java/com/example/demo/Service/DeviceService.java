@@ -1,199 +1,189 @@
-//package com.example.demo.Service;
-//
-//import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-//import com.example.demo.DTO.DeviceDTO;
-//import com.example.demo.Entity.Brand;
-//import com.example.demo.Entity.Device;
-//import com.example.demo.Entity.Device_info;
-//import com.example.demo.Entity.Response.DeviceWIthNecessaryParameters;
-//import com.example.demo.Entity.Type;
-//import com.example.demo.Repositories.DeviceRepository;
-//import com.fasterxml.jackson.core.JsonProcessingException;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import org.json.JSONArray;
-//import org.json.JSONException;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//import org.springframework.web.multipart.MultipartFile;
-//
-//import javax.servlet.http.HttpServletResponse;
-//import java.io.File;
-//import java.io.IOException;
-//import java.util.*;
-//import java.util.stream.Collectors;
-//
-//@Service
-//public class DeviceService {
-//
-//
-//    @Autowired
-//    DeviceRepository deviceRepository;
-//
+package com.example.demo.Service;
+
+import com.example.demo.Controller.AuxiliaryClasses.CustomException;
+import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
+import com.example.demo.Entity.Brand;
+import com.example.demo.Entity.Device;
+import com.example.demo.Entity.Device_info;
+import com.example.demo.Entity.Type;
+import com.example.demo.Repositories.BrandRepository;
+import com.example.demo.Repositories.DeviceRepository;
+import com.example.demo.Repositories.Device_infoRepository;
+import com.example.demo.Repositories.TypeRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class DeviceService {
+
+
+    @Autowired
+    DeviceRepository deviceRepository;
+    @Autowired
+    BrandRepository brandRepository;
+    @Autowired
+    TypeRepository typeRepository;
+    @Autowired
+    Device_infoRepository device_infoRepository;
+
+
 //    @Autowired
 //    BrandService brandService;
 //    @Autowired
 //    TypeService typeService;
 //    @Autowired
 //    Device_infoService device_infoService;
-//
-//
-//    /**
-//     * Добавление Девайса
-//     *
-//     * @param brandName название Бренда, к которому будет относится Девайс
-//     * @param typeName название Типа, к которому будет относится Девайс
-//     * @param file картинка в битовом представление (ава Девайса)
-//     * @param ref ссылка на картинку (ава Девайса)
-//     * @param name название Девайса
-//     * @param price цена Девайса
-//     * @param list лист с характеристиками Девайса (Device_info)
-//     *
-//     * @code 201 - Created
-//     * @code 400 - Incorrect JSON
-//     * @code 400 - This name of Device already exists
-//     * @code 400 - This Type doesn't exist
-//     * @code 400 - This Brand (%s) of this Type (%s) doesn't exist
-//     * @code 400 - Incorrect image extension
-//     */
-//    public void addDevice(String brandName,
-//                          String typeName,
-//                          MultipartFile file,
-//                          String ref,
-//                          String name,
-//                          String price,
-//                          JSONArray list) {
-//
-//        Device device = new Device();
-//
-//        createDeviceAndSaveInDB(device, brandName, typeName, file, ref, name, price);
-//        createDeviceInfoAndSaveInDB(list, device);
-//    }
-//
-//    /**
-//     * Сохранения Девайса в БД с добавлением ему переданных значений
-//     * @param device Девайс, которому добавляют все значения
-//     * @param brandName название Бренда, к которому будет относится Девайс
-//     * @param typeName название Типа, к которому будет относится Девайс
-//     * @param file картинка в битовом представление (ава Девайса)
-//     * @param ref ссылка на картинку (ава Девайса)
-//     * @param name название Девайса
-//     * @param price цена Девайса
-//     *
-//     * @code 400 - This name of Device already exists
-//     * @code 400 - This Type doesn't exist
-//     * @code 400 - This Brand (%s) of this Type (%s) doesn't exist
-//     * @code 400 - Incorrect image extension
-//     */
-//    public void createDeviceAndSaveInDB(Device device,
-//                                        String brandName,
-//                                        String typeName,
-//                                        MultipartFile file,
-//                                        String ref,
-//                                        String name,
-//                                        String price){
-//        if(deviceRepository.existsByName(name)){
-//            Device temp = deviceRepository.findById(device.getId()).orElse(null);
-//            if(temp == null || !temp.getName().equals(name)){
-//                StaticMethods.createResponse(400, "This name of Device already exists");
-//                return;
-//            }
-//
-//        }
-//        Type type = typeService.findByName(typeName);
-//        if(type == null){
-//            StaticMethods.createResponse(400, "This Type doesn't exist");
-//            return;
-//        }
-//        Brand brand = brandService.findByNameAndTypeId(brandName, type);
-//        if(brand == null){
-//            StaticMethods.createResponse(400,
-//                    String.format(
-//                            "This Brand (%s) of this Type (%s) doesn't exist",
-//                            typeName,
-//                            brandName));
-//            return;
-//        }
-//
-//
-//
-//        if(file != null) {
-//            String startName = StaticMethods.getFileExtension(file.getOriginalFilename());
-//            if(startName==null || (
-//                    !startName.equals("jpeg")
-//                            && !startName.equals("jpg")
-//                            && !startName.equals("pjpeg")
-//                            && !startName.equals("png")
-//                            && !startName.equals("tiff")
-//                            && !startName.equals("wbmp")
-//                            && !startName.equals("webp"))
-//            ){
-//                StaticMethods.createResponse(400,
-//                        "Incorrect image extension");
-//                return;
-//            }
-//
-//            String uuid = UUID.randomUUID().toString();
-//            String fileName = uuid + file.getOriginalFilename();
-//            String pathFile = System.getProperty("user.dir").replace("\\","/") + "/src/main/resources/static/images/" + fileName;
-//
-//
-//            try {
-//                file.transferTo(new File(pathFile));
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            device.setPathFile(fileName);
-//            device.setIsName(true);
-//        }else if(ref!=null) {
-//            device.setPathFile(ref);
-//            device.setIsName(false);
-//        }
-//
-//        device.setTypeId(type);
-//        device.setBrandId(brand);
-//        device.setName(name);
-//        device.setPrice(price);
-//        device.setDataOfCreate(System.currentTimeMillis());
-//
-//        deviceRepository.save(device);
-//    }
-//
-//    /**
-//     * Добавление дополнительно информации Девайсу с последующим сохранением в БД
-//     * @param list лист с характеристиками Девайса (Device_info)
-//     * @param device сам Девайс, которому добавляют Device_info
-//     *
-//     * @code 201 - Created
-//     * @code 400 - Incorrect JSON
-//     */
-//    public void createDeviceInfoAndSaveInDB(JSONArray list, Device device){
-//        try {
-//
-//            for(int i = 0; i < list.length(); i++){
-//                String characteristic = list.getString(i);
-//
-//
-//                Device_info device_info;
-//                try{
-//                    device_info = new ObjectMapper().readValue(characteristic, Device_info.class);
-//                } catch (JsonProcessingException e ){
-//                    e.printStackTrace();
-//                    StaticMethods.createResponse( 400, "Incorrect JSON");
-//                    return;
-//                }
-//                device_info.setDeviceId(device);
-//                device_infoService.addDevice_info(device_info);
-//            }
-//
-//            StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
-//
-//        } catch (JSONException e) {
-//            StaticMethods.createResponse(HttpServletResponse.SC_BAD_REQUEST, "Incorrect JSON");
-//            e.printStackTrace();
-//        }
-//    }
-//
-//
+
+
+    /**
+     * Добавление Девайса
+     *
+     * @param brandName название Бренда, к которому будет относится Девайс
+     * @param typeName название Типа, к которому будет относится Девайс
+     * @param file картинка в битовом представление (ава Девайса)
+     * @param ref ссылка на картинку (ава Девайса)
+     * @param name название Девайса
+     * @param price цена Девайса
+     * @param list лист с характеристиками Девайса (Device_info)
+     *
+     * @code 201 - Created
+     * @code 400 - Incorrect JSON
+     * @code 400 - This name of Device already exists
+     * @code 400 - This Type doesn't exist
+     * @code 400 - This Brand (%s) of this Type (%s) doesn't exist
+     * @code 400 - Incorrect image extension
+     */
+    public Mono<Void> addDevice(String brandName,
+                          String typeName,
+                          MultipartFile file,
+                          String ref,
+                          String name,
+                          String price,
+                          String list) {
+        return typeRepository
+                .findByName(typeName)
+                .switchIfEmpty(Mono.error(new CustomException("This Type doesn't exist")))
+                .zipWhen(type -> {
+                    return brandRepository
+                            .findByNameAndTypeId(brandName, type.getId())
+                            .switchIfEmpty(Mono.error(new CustomException(
+                                    String.format("This Brand (%s) of this Type (%s) doesn't exist", brandName, typeName)))
+                            );
+                })
+                .flatMap(tuple2 -> {
+                    Type type = tuple2.getT1();
+                    Brand brand = tuple2.getT2();
+                    Device device = createBodyOfDevice(brand.getId(), type.getId(), file, ref, name, price);
+                    if(device == null)
+                        return Mono.error(new CustomException("Incorrect image extension"));
+
+                    return deviceRepository
+                            .save(device)
+                            .onErrorResume(throwable -> Mono.error(new CustomException("This name of Device already exists")))
+                            .flatMap(savedDevice -> createDeviceInfoAndSaveInDB(list, device.getId()));
+                })
+                .then(Mono.empty());
+    }
+
+    private Device createBodyOfDevice(Long brandId,
+                                      Long typeId,
+                                      MultipartFile file,
+                                      String ref,
+                                      String name,
+                                      String price){
+        Device device = new Device();
+        if(file != null) {
+            String startName = StaticMethods.getFileExtension(file.getOriginalFilename());
+            if(startName==null || (
+                    !startName.equals("jpeg")
+                            && !startName.equals("jpg")
+                            && !startName.equals("pjpeg")
+                            && !startName.equals("png")
+                            && !startName.equals("tiff")
+                            && !startName.equals("wbmp")
+                            && !startName.equals("webp"))
+            ){
+                return null;
+            }
+
+            String uuid = UUID.randomUUID().toString();
+            String fileName = uuid + file.getOriginalFilename();
+            String pathFile = System.getProperty("user.dir").replace("\\","/") + "/src/main/resources/static/images/" + fileName;
+
+
+            try {
+                file.transferTo(new File(pathFile));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            device.setPathFile(fileName);
+            device.setIsName(true);
+        }else if(ref!=null) {
+            device.setPathFile(ref);
+            device.setIsName(false);
+        }
+
+        device.setTypeId(typeId);
+        device.setBrandId(brandId);
+        device.setName(name);
+        device.setPrice(price);
+        device.setDataOfCreate(System.currentTimeMillis());
+        return device;
+    }
+
+    /**
+     * Добавление дополнительно информации Девайсу с последующим сохранением в БД
+     * @param strList лист с характеристиками Девайса (Device_info)
+     * @param deviceId :id Девайса, которому добавляют Device_info
+     *
+     * @code 201 - Created
+     * @code 400 - Incorrect JSON
+     */
+    @SneakyThrows
+    public Mono<Void> createDeviceInfoAndSaveInDB(String strList, Long deviceId){
+        JSONArray list;
+        try {
+            list = new JSONArray(strList);
+        } catch (JSONException e) {
+            throw new CustomException("Incorrect JSON in characteristics");
+        }
+
+        List<Device_info> device_infos = new ArrayList<>();
+
+        for(int i = 0; i < list.length(); i++){
+            String characteristic = list.getString(i);
+            Device_info device_info;
+            try{
+                device_info = new ObjectMapper().readValue(characteristic, Device_info.class);
+            } catch (JsonProcessingException e ){
+                e.printStackTrace();
+                throw new CustomException("Incorrect JSON");
+            }
+            device_info.setDeviceId(deviceId);
+            device_infos.add(device_info);
+        }
+
+        return device_infoRepository
+                .saveAll(device_infos)
+                .then(Mono.empty());
+    }
+
+
 //    /**
 //     * Получение Девайсов исходя из входных параметров
 //     * @param type Название Типа, к которому относится Девайс
@@ -324,14 +314,14 @@
 //    public List<Device> findAllByBrandId(Brand brand){
 //        return deviceRepository.findAllByBrandId(brand);
 //    }
-//
-//
-//    /** Получение всех Девайсов*/
-//    public List<Device> getAll() {
-//        return deviceRepository.findAll();
-//    }
-//
-//
+
+
+    /** Получение всех Девайсов*/
+    public Flux<Device> getAll() {
+        return deviceRepository.findAll();
+    }
+
+
 //    /**
 //     * Удаление Девайса по его :id
 //     * @param body (json) :id Девайса
@@ -430,4 +420,4 @@
 //        list = list.subList(0, Math.min(list.size(), 24));
 //        return DeviceDTO.createList(list);
 //    }
-//}
+}
