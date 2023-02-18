@@ -2,14 +2,13 @@ package com.example.demo.Service;
 
 import com.example.demo.Controller.AuxiliaryClasses.CustomException;
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
+import com.example.demo.DTO.DeviceDTO;
+import com.example.demo.DTO.DeviceWithNecessaryParameters;
 import com.example.demo.Entity.Brand;
 import com.example.demo.Entity.Device;
 import com.example.demo.Entity.Device_info;
 import com.example.demo.Entity.Type;
-import com.example.demo.Repositories.BrandRepository;
-import com.example.demo.Repositories.DeviceRepository;
-import com.example.demo.Repositories.Device_infoRepository;
-import com.example.demo.Repositories.TypeRepository;
+import com.example.demo.Repositories.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +39,8 @@ public class DeviceService {
     TypeRepository typeRepository;
     @Autowired
     Device_infoRepository device_infoRepository;
+    @Autowired
+    DeviceDTORepo deviceDTORepo;
 
 
 //    @Autowired
@@ -184,35 +186,69 @@ public class DeviceService {
     }
 
 
-//    /**
-//     * Получение Девайсов исходя из входных параметров
-//     * @param type Название Типа, к которому относится Девайс
-//     * @param brands Название Бренда, к которому относится Девайс
-//     * @param page Номер страницы, которую хочет видеть клиент
-//     * @param limit Количество Девайсов, отображаемых на одной странице у клиента
-//     * @param minPrice минимальная цена Девайса
-//     * @param maxPrice максимальная цена Девайса
-//     *
-//     * @code = 400 - The minPrice more than the maxPrice
-//     * @code = 400 - Devices with this type doesn't exists
-//     * @code = 400 - Devices with this brands doesn't exists
-//     * @code = 400 - Devices with this price doesn't exists
-//     * @code = 400 - Incorrect data of page or limit
-//     */
-//    public DeviceWIthNecessaryParameters getByParams(String type,
-//                                           List<String> brands,
-//                                           int page, int limit,
-//                                           int minPrice, int maxPrice) {
-//
-//        if(maxPrice!=-1 && minPrice > maxPrice){
-//            StaticMethods.createResponse(400,"The minPrice more than the maxPrice");
-//            return null;
-//        }
-//
-//        List<Device> list = new ArrayList<>();
-//
-//        // Условие для получения листа Девайсов исходя из переданных Брендов(если они имеются) и Типа
+    /**
+     * Получение Девайсов исходя из входных параметров
+     * @param typeName Название Типа, к которому относится Девайс
+     * @param brands Название Бренда, к которому относится Девайс
+     * @param page Номер страницы, которую хочет видеть клиент
+     * @param limit Количество Девайсов, отображаемых на одной странице у клиента
+     * @param minPrice минимальная цена Девайса
+     * @param maxPrice максимальная цена Девайса
+     *
+     * @code = 400 - The minPrice more than the maxPrice
+     * @code = 400 - Devices with this type doesn't exists
+     * @code = 400 - Devices with this brands doesn't exists
+     * @code = 400 - Devices with this price doesn't exists
+     * @code = 400 - Incorrect data of page or limit
+     */
+//    public Mono<DeviceWithNecessaryParameters> getByParams(String typeName,
+    public Flux<DeviceDTO> getByParams(String typeName,
+                                                           List<String> brands,
+                                                           int page, int limit,
+                                                           int minPrice, int maxPrice) {
+
+        if(maxPrice!=-1 && minPrice > maxPrice)
+            return Flux.error(new CustomException("The minPrice more than the maxPrice"));
+
+
+        List<Device> list = new ArrayList<>();
+
+        // Условие для получения листа Девайсов исходя из переданных Брендов(если они имеются) и Типа
 //        if(brands==null || brands.size()==0){
+
+            int fromIndex = (page - 1) * limit;
+            int toIndex = page * limit;
+
+
+            List<DeviceDTO> devices = new ArrayList<>();
+            return deviceDTORepo
+                    .findAllWithParamsWithoutBrands(typeName, minPrice, maxPrice);
+//                    .map(deviceDTO -> {
+//
+//                    })
+//                    .map(deviceDTOS -> {
+//
+//                    });
+//
+//            return devices;
+//
+//            return typeRepository
+//                    .findByName(typeName)
+//                    .publishOn(Schedulers.boundedElastic())
+//                    .map(type -> {
+//
+//                    })
+//                    .map()
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //             list = deviceRepository.findAllByTypeId(typeService.findByName(type));
 //
 //            if(list.isEmpty()){
@@ -266,13 +302,13 @@ public class DeviceService {
 //
 //        List<DeviceDTO> listDTO = DeviceDTO.createList(list.subList(fromIndex, toIndex));
 //
-//        return new DeviceWIthNecessaryParameters(listDTO,
+//        return new DeviceWithNecessaryParameters(listDTO,
 //                amountOfAllDevices,
 //                deviceWithMaxPrice.orElse(null).getPrice(),
 //                deviceWithMinPrice.orElse(null).getPrice());
-//    }
-//
-//
+    }
+
+
 //    /**
 //     * Фильтрация листа с Девайсами по цене
 //     * @param list лист Девайсов, который будет отфильтрован, исходя из мин. и макс. ценовых значений

@@ -1,5 +1,6 @@
 package com.example.demo.Controller.BasicController;
 
+import com.example.demo.DTO.DeviceDTO;
 import com.example.demo.Entity.Device;
 import com.example.demo.Service.DeviceService;
 import io.swagger.annotations.*;
@@ -66,52 +67,52 @@ public class DeviceController {
     }
 
 
-//    @ApiOperation(value = "Получение Девайсов по параметрам")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 400, message = "The minPrice more than the maxPrice"),
-//            @ApiResponse(code = 400, message = "Devices with this type doesn't exists"),
-//            @ApiResponse(code = 400, message = "Devices with this brands doesn't exists"),
-//            @ApiResponse(code = 400, message = "Devices with this price doesn't exists"),
-//            @ApiResponse(code = 400, message = "Incorrect data of page or limit")
-//    })
-//    @GetMapping("/getByParams")
-//    public DeviceWIthNecessaryParameters getByParams(
-//            @ApiParam(
-//                    value = "Наименование Типа",
-//                    example = "Смартфоны",
-//                    required = true
-//            )
-//             @RequestParam("type") String type,
-//            @ApiParam(
-//                    value = "Наименование Брендов",
-//                    example = "Apple"
-//            )
-//             @RequestParam(value = "brand", required = false) List<String> brand,
-//            @ApiParam(
-//                    value = "Номер страницы",
-//                    example = "5"
-//            )
-//             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-//            @ApiParam(
-//                    value = "Количество девайсов, которые отображаются на одной странице",
-//                    example = "50"
-//            )
-//             @RequestParam(value = "limit", required = false , defaultValue = "20") int limit,
-//            @ApiParam(
-//                    value = "Минимальная цена девайса",
-//                    example = "1500"
-//            )
-//             @RequestParam(value = "minPrice", required = false, defaultValue = "0") int minPrice,
-//            @ApiParam(
-//                    value = "Максимальная цена девайса",
-//                    example = "5000"
-//            )
-//             @RequestParam(value = "maxPrice", required = false, defaultValue = "-1") int maxPrice){
-//
-//        return deviceService.getByParams(type, brand, page, limit, minPrice, maxPrice);
-//    }
-//
-//
+    @ApiOperation(value = "Получение Девайсов по параметрам")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "The minPrice more than the maxPrice"),
+            @ApiResponse(code = 400, message = "Devices with this type doesn't exists"),
+            @ApiResponse(code = 400, message = "Devices with this brands doesn't exists"),
+            @ApiResponse(code = 400, message = "Devices with this price doesn't exists"),
+            @ApiResponse(code = 400, message = "Incorrect data of page or limit")
+    })
+    @GetMapping("/getByParams")
+    public Flux<DeviceDTO> getByParams(
+            @ApiParam(
+                    value = "Наименование Типа",
+                    example = "Смартфоны",
+                    required = true
+            )
+             @RequestParam("type") String type,
+            @ApiParam(
+                    value = "Наименование Брендов",
+                    example = "Apple"
+            )
+             @RequestParam(value = "brand", required = false) List<String> brand,
+            @ApiParam(
+                    value = "Номер страницы",
+                    example = "5"
+            )
+             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @ApiParam(
+                    value = "Количество девайсов, которые отображаются на одной странице",
+                    example = "50"
+            )
+             @RequestParam(value = "limit", required = false , defaultValue = "20") int limit,
+            @ApiParam(
+                    value = "Минимальная цена девайса",
+                    example = "1500"
+            )
+             @RequestParam(value = "minPrice", required = false, defaultValue = "0") int minPrice,
+            @ApiParam(
+                    value = "Максимальная цена девайса",
+                    example = "5000"
+            )
+             @RequestParam(value = "maxPrice", required = false, defaultValue = "2147483647") int maxPrice){
+
+        return deviceService.getByParams(type, brand, page, limit, minPrice, maxPrice);
+    }
+
+
 //    @ApiOperation(value = "Удаление девайса")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),
