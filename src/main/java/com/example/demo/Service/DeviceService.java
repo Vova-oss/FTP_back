@@ -3,7 +3,6 @@ package com.example.demo.Service;
 import com.example.demo.Controller.AuxiliaryClasses.CustomException;
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
 import com.example.demo.DTO.DeviceDTO;
-import com.example.demo.DTO.DeviceWithNecessaryParameters;
 import com.example.demo.Entity.Brand;
 import com.example.demo.Entity.Device;
 import com.example.demo.Entity.Device_info;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
 import java.io.IOException;

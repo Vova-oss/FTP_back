@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class DeviceWithNecessaryParameters {
+public class DeviceDTOList {
 
     @ApiModelProperty(value = "Девайсы без лишних полей")
     List<DeviceDTO> list;
@@ -20,7 +20,7 @@ public class DeviceWithNecessaryParameters {
     @ApiModelProperty(value = "Максимальная цена по данному запросу")
     String minPrice;
 
-    public DeviceWithNecessaryParameters(List<DeviceDTO> list, int amountOfAllDevices, String maxPrice, String minPrice) {
+    public DeviceDTOList(List<DeviceDTO> list, int amountOfAllDevices, String maxPrice, String minPrice) {
         this.list = list;
         this.amountOfAllDevices = amountOfAllDevices;
         this.maxPrice = maxPrice;
