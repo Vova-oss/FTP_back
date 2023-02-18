@@ -1,6 +1,7 @@
 package com.example.demo.Controller.BasicController;
 
 import com.example.demo.DTO.DeviceDTO;
+import com.example.demo.DTO.DeviceDTOList;
 import com.example.demo.Entity.Device;
 import com.example.demo.Service.DeviceService;
 import io.swagger.annotations.*;
@@ -76,7 +77,7 @@ public class DeviceController {
             @ApiResponse(code = 400, message = "Incorrect data of page or limit")
     })
     @GetMapping("/getByParams")
-    public Flux<DeviceDTO> getByParams(
+    public Mono<DeviceDTOList> getByParams(
             @ApiParam(
                     value = "Наименование Типа",
                     example = "Смартфоны",

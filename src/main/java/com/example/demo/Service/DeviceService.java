@@ -2,7 +2,8 @@ package com.example.demo.Service;
 
 import com.example.demo.Controller.AuxiliaryClasses.CustomException;
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-import com.example.demo.DTO.DeviceDTO;
+import com.example.demo.DTO.DeviceDTOList;
+import com.example.demo.DTO.Device_infoDTO;
 import com.example.demo.Entity.Brand;
 import com.example.demo.Entity.Device;
 import com.example.demo.Entity.Device_info;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +41,8 @@ public class DeviceService {
     Device_infoRepository device_infoRepository;
     @Autowired
     DeviceDTORepo deviceDTORepo;
+    @Autowired
+    DeviceDTOListRepo deviceDTOListRepo;
 
 
 //    @Autowired
@@ -199,61 +203,87 @@ public class DeviceService {
      * @code = 400 - Devices with this price doesn't exists
      * @code = 400 - Incorrect data of page or limit
      */
-//    public Mono<DeviceWithNecessaryParameters> getByParams(String typeName,
-    public Flux<DeviceDTO> getByParams(String typeName,
+    public Mono<DeviceDTOList> getByParams(String typeName,
                                                            List<String> brands,
                                                            int page, int limit,
                                                            int minPrice, int maxPrice) {
 
         if(maxPrice!=-1 && minPrice > maxPrice)
-            return Flux.error(new CustomException("The minPrice more than the maxPrice"));
+            return Mono.error(new CustomException("The minPrice more than the maxPrice"));
 
 
-        List<Device> list = new ArrayList<>();
+        int offset = (page - 1) * limit;
 
-        // Условие для получения листа Девайсов исходя из переданных Брендов(если они имеются) и Типа
-//        if(brands==null || brands.size()==0){
-
-            int fromIndex = (page - 1) * limit;
-            int toIndex = page * limit;
-
-
-            List<DeviceDTO> devices = new ArrayList<>();
+//         Условие для получения листа Девайсов исходя из переданных Брендов(если они имеются) и Типа
+        if(brands==null || brands.size()==0){
             return deviceDTORepo
-                    .findAllWithParamsWithoutBrands(typeName, minPrice, maxPrice);
-//                    .map(deviceDTO -> {
-//
-//                    })
-//                    .map(deviceDTOS -> {
-//
-//                    });
-//
-//            return devices;
-//
-//            return typeRepository
-//                    .findByName(typeName)
-//                    .publishOn(Schedulers.boundedElastic())
-//                    .map(type -> {
-//
-//                    })
-//                    .map()
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//             list = deviceRepository.findAllByTypeId(typeService.findByName(type));
-//
-//            if(list.isEmpty()){
-//                StaticMethods.createResponse(400,"Devices with this type doesn't exists");
-//                return null;
-//            }
-//        }else {
+                    .findAllWithParamsWithoutBrands(typeName, minPrice, maxPrice, offset, limit)
+                    .switchIfEmpty(Mono.error(new CustomException("Devices with this params doesn't exists")))
+                    .publishOn(Schedulers.boundedElastic())
+                    .map(deviceDTO -> {
+                        device_infoRepository
+                                .findAllByDeviceId(deviceDTO.getId())
+                                .collectList()
+                                .map(Device_infoDTO::createList)
+                                .map(device_infoDTOS -> {
+                                    deviceDTO.setDevice_infoResponseModels(device_infoDTOS);
+                                    return device_infoDTOS;
+                                })
+                                .block();
+                        return deviceDTO;
+                    })
+                    .collectList()
+                    .map(deviceDTOS -> {
+                        DeviceDTOList deviceDTOList = new DeviceDTOList();
+                        deviceDTOList.setList(deviceDTOS);
+
+                        deviceDTOListRepo
+                                .findByParamsWithoutBrands(typeName)
+                                .map(allInfo ->{
+                                    deviceDTOList.setAmountOfAllDevices(allInfo.getAmountOfAllDevices());
+                                    deviceDTOList.setMaxPrice(allInfo.getMaxPrice());
+                                    deviceDTOList.setMinPrice(allInfo.getMinPrice());
+                                    return allInfo;
+                                })
+                                .block();
+
+                        return deviceDTOList;
+                    });
+        }else {
+            return deviceDTORepo
+                    .findAllWithParamsWithBrands(typeName, brands, minPrice, maxPrice, offset, limit)
+                    .switchIfEmpty(Mono.error(new CustomException("Devices with this params doesn't exists")))
+                    .publishOn(Schedulers.boundedElastic())
+                    .map(deviceDTO -> {
+                        device_infoRepository
+                                .findAllByDeviceId(deviceDTO.getId())
+                                .collectList()
+                                .map(Device_infoDTO::createList)
+                                .map(device_infoDTOS -> {
+                                    deviceDTO.setDevice_infoResponseModels(device_infoDTOS);
+                                    return device_infoDTOS;
+                                })
+                                .block();
+                        return deviceDTO;
+                    })
+                    .collectList()
+                    .map(deviceDTOS -> {
+                        DeviceDTOList deviceDTOList = new DeviceDTOList();
+                        deviceDTOList.setList(deviceDTOS);
+
+                        deviceDTOListRepo
+                                .findByParamsWithBrands(typeName, brands)
+                                .map(allInfo ->{
+                                    deviceDTOList.setAmountOfAllDevices(allInfo.getAmountOfAllDevices());
+                                    deviceDTOList.setMaxPrice(allInfo.getMaxPrice());
+                                    deviceDTOList.setMinPrice(allInfo.getMinPrice());
+                                    return allInfo;
+                                })
+                                .block();
+
+                        return deviceDTOList;
+                    });
+        }
 //            brands = brands.stream().distinct().collect(Collectors.toList());
 //            for(String brand: brands) {
 //

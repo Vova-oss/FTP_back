@@ -2,10 +2,12 @@ package com.example.demo.DTO;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class DeviceDTOList {
 
     @ApiModelProperty(value = "Девайсы без лишних полей")
