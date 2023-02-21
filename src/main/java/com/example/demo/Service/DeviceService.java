@@ -386,15 +386,34 @@ public class DeviceService {
     }
 
 
-//    /**
-//     * Удаление Девайса по его :id
-//     * @param body (json) :id Девайса
-//     *
-//     * @code 204 - No Content
-//     * @code 400 - Incorrect JSON
-//     * @code 400 - There isn't exist Device with this id
-//     */
-//    public void deleteDevice(String body) {
+    /**
+     * Удаление Девайса по его :id
+     * @param body (json) :id Девайса
+     *
+     * @code 204 - No Content
+     * @code 400 - Incorrect JSON
+     * @code 400 - There isn't exist Device with this id
+     */
+    public Mono<Void> deleteDevice(String body) {
+
+
+        Long id = Long.valueOf(StaticMethods.parsingJson(body, "id"));
+        return deviceRepository
+                .findById(id)
+                .switchIfEmpty(Mono.error(() -> new CustomException("There isn't exist Device with this id")))
+                .flatMap(device -> {
+                    if(device.getIsName())
+                        new File(System.getProperty("user.dir").replace("\\","/") + "/src/main/resources/static/images/" + device.getPathFile()).delete();
+                    return device_infoRepository.deleteAllByDeviceId(id);
+                })
+                .then(deviceRepository.deleteById(id));
+//        return device_infoRepository
+//                .deleteAllByDeviceId(id)
+//                .zipWith(deviceRepository.deleteById(id))
+//                .then(Mono.empty());
+//
+//
+//
 //
 //        String id = StaticMethods.parsingJson(body, "id");
 //        if(id == null)
@@ -402,16 +421,15 @@ public class DeviceService {
 //        Device device = deviceRepository.findById(Long.valueOf(id)).orElse(null);
 //
 //        if(device!=null && device.getIsName()){
-//            new File(System.getProperty("user.dir").replace("\\","/") + "/src/main/resources/static/images/" + device.getPathFile()).delete();
 //            deviceRepository.delete(device);
 //            StaticMethods.createResponse(HttpServletResponse.SC_NO_CONTENT, "No Content");
 //            return;
 //        }
 //
 //        StaticMethods.createResponse(400,"There isn't exist Device with this id");
-//    }
-//
-//
+    }
+
+
 //    /**
 //     * Получение Девайса и дальнейшее его конвертирование в DeviceDTO
 //     * @param id :id Девайса

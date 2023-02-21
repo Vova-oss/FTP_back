@@ -7,6 +7,7 @@ import com.example.demo.Service.DeviceService;
 import io.swagger.annotations.*;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +35,7 @@ public class DeviceController {
             @ApiResponse(code = 400, message = "This Brand of this Type doesn't exist"),
             @ApiResponse(code = 400, message = "Incorrect image extension")
     })
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public Mono<Void> addDevice(
             @ApiParam(
@@ -114,24 +116,25 @@ public class DeviceController {
     }
 
 
-//    @ApiOperation(value = "Удаление девайса")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 204, message = "No Content"),
-//            @ApiResponse(code = 400, message = "There isn't exist Device with this id")
-//    })
-//    @DeleteMapping("/delete")
-//    public void deleteDevice(
-//            @ApiParam(
-//                    value = ":id Девайса, который необходимо удалить",
-//                    example = "{\n\"id\":\"5\"\n}"
-//            )
-//            @RequestBody String body,
-//            HttpServletRequest request){
-//        deviceService.deleteDevice(body);
-//    }
-//
-//
+    @ApiOperation(value = "Удаление девайса")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 204, message = "No Content"),
+            @ApiResponse(code = 400, message = "There isn't exist Device with this id")
+    })
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/delete")
+    public Mono<Void> deleteDevice(
+            @ApiParam(
+                    value = ":id Девайса, который необходимо удалить",
+                    example = "{\n\"id\":\"5\"\n}"
+            )
+            @RequestBody String body){
+        return deviceService.deleteDevice(body);
+    }
+
+
 //    @ApiOperation(value = "Изменение девайсов")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),
