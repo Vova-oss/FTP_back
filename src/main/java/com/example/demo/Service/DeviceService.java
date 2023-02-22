@@ -2,6 +2,7 @@ package com.example.demo.Service;
 
 import com.example.demo.Controller.AuxiliaryClasses.CustomException;
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
+import com.example.demo.DTO.DeviceDTO;
 import com.example.demo.DTO.DeviceDTOList;
 import com.example.demo.DTO.Device_infoDTO;
 import com.example.demo.Entity.Brand;
@@ -495,11 +496,28 @@ public class DeviceService {
 //        createDeviceAndSaveInDB(device, brand, type, file, ref, name, price);
 //        createDeviceInfoAndSaveInDB(list, device);
 //    }
-//
-//    public List<DeviceDTO> getTopDevices() {
+
+    public Flux<DeviceDTO> getTopDevices() {
+
+       return deviceDTORepo
+                .findTop24()
+               .publishOn(Schedulers.boundedElastic())
+                .map(deviceDTO -> {
+                    device_infoRepository
+                            .findAllByDeviceId(deviceDTO.getId())
+                            .collectList()
+                            .map(Device_infoDTO::createList)
+                            .map(device_infoDTOS -> {
+                                deviceDTO.setDevice_infoResponseModels(device_infoDTOS);
+                                return device_infoDTOS;
+                            })
+                            .block();
+                    return deviceDTO;
+                });
+
 //        List<Device> list = deviceRepository.findAll();
 //        list.sort((o1, o2) -> o2.getDataOfCreate().compareTo(o1.getDataOfCreate()));
 //        list = list.subList(0, Math.min(list.size(), 24));
 //        return DeviceDTO.createList(list);
-//    }
+    }
 }

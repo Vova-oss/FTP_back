@@ -65,6 +65,18 @@ public interface DeviceDTORepo extends ReactiveCrudRepository<DeviceDTO, Long> {
     );
 
 
-//    Flux<Device> findAllWithParamsWithBrands(Long id);
+    @Query(value = "select od.id,\n" +
+            "\t   od.data_of_create,\n" +
+            "\t   od.is_name,\n" +
+            "\t   od.\"name\",\n" +
+            "\t   od.path_file,\n" +
+            "\t   od.price,\n" +
+            "\t   ob.\"name\" as brand_name,\n" +
+            "\t   ot.\"name\" as type_name\n" +
+            "\tfrom os_device od join os_brand ob ON ob.id = od.brand_id\n" +
+            "\tjoin os_type ot ON ot.id = ob.type_id\n" +
+            "\torder by data_of_create DESC\n" +
+            "\tlimit 24")
+    Flux<DeviceDTO> findTop24();
 
 }

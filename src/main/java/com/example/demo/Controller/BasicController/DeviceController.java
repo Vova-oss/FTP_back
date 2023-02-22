@@ -199,14 +199,14 @@ public class DeviceController {
 //            HttpServletResponse response){
 //        return deviceService.getDTOById(id);
 //    }
-//
-//    @ApiOperation(value = "Топ 24 новых девайсов")
-//    @GetMapping("/getTopDevices")
-//    public List<DeviceDTO> getTopDevices(){
-//        return deviceService.getTopDevices();
-//    }
-//
-//
+
+    @ApiOperation(value = "Топ 24 новых девайсов")
+    @GetMapping("/getTopDevices")
+    public Flux<DeviceDTO> getTopDevices(){
+        return deviceService.getTopDevices();
+    }
+
+
 
     // For my tests
     @ApiOperation(value = "Получение всех девайсов без обработки от лишних полей", hidden = true)
