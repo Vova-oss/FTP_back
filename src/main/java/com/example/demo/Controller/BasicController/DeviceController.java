@@ -181,24 +181,22 @@ public class DeviceController {
 //            @RequestParam("characteristic") JSONArray list) {
 //        deviceService.editDevice(id, brand, type, ref,file, name, price, list);
 //    }
-//
-//
-//    @ApiOperation(value = "Получение девайса по :id")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 400, message = "There isn't exist Device with this id")
-//    })
-//    @GetMapping("/getById/{id}")
-//    public DeviceDTO getById(
-//            @ApiParam(
-//                    value = ":id Девайса, который необходимо получить",
-//                    example = "5",
-//                    required = true
-//            )
-//            @PathVariable String id,
-//            HttpServletRequest request,
-//            HttpServletResponse response){
-//        return deviceService.getDTOById(id);
-//    }
+
+
+    @ApiOperation(value = "Получение девайса по :id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "There isn't exist Device with this id")
+    })
+    @GetMapping("/getById/{id}")
+    public Mono<DeviceDTO> getById(
+            @ApiParam(
+                    value = ":id Девайса, который необходимо получить",
+                    example = "5",
+                    required = true
+            )
+            @PathVariable String id){
+        return deviceService.getDTOById(id);
+    }
 
     @ApiOperation(value = "Топ 24 новых девайсов")
     @GetMapping("/getTopDevices")

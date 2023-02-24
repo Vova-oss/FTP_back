@@ -408,43 +408,34 @@ public class DeviceService {
                     return device_infoRepository.deleteAllByDeviceId(id);
                 })
                 .then(deviceRepository.deleteById(id));
-//        return device_infoRepository
-//                .deleteAllByDeviceId(id)
-//                .zipWith(deviceRepository.deleteById(id))
-//                .then(Mono.empty());
-//
-//
-//
-//
-//        String id = StaticMethods.parsingJson(body, "id");
-//        if(id == null)
-//            return;
-//        Device device = deviceRepository.findById(Long.valueOf(id)).orElse(null);
-//
-//        if(device!=null && device.getIsName()){
-//            deviceRepository.delete(device);
-//            StaticMethods.createResponse(HttpServletResponse.SC_NO_CONTENT, "No Content");
-//            return;
-//        }
-//
-//        StaticMethods.createResponse(400,"There isn't exist Device with this id");
     }
 
 
-//    /**
-//     * Получение Девайса и дальнейшее его конвертирование в DeviceDTO
-//     * @param id :id Девайса
-//     * @code 400 - There isn't exist Device with this id
-//     */
-//    public DeviceDTO getDTOById(String id) {
-//        Device device = deviceRepository.findById(Long.valueOf(id)).orElse(null);
-//        if(device==null){
-//            StaticMethods.createResponse(400,"There isn't exist Device with this id");
-//            return null;
-//        }
-//        return DeviceDTO.create(device);
-//    }
-//
+    /**
+     * Получение Девайса и дальнейшее его конвертирование в DeviceDTO
+     * @param id :id Девайса
+     * @code 400 - There isn't exist Device with this id
+     */
+    public Mono<DeviceDTO> getDTOById(String id) {
+
+
+        return deviceDTORepo
+                .getById(Long.valueOf(id))
+                .publishOn(Schedulers.boundedElastic())
+                .map(deviceDTO -> {
+                    device_infoRepository
+                            .findAllByDeviceId(Long.valueOf(id))
+                            .collectList()
+                            .map(Device_infoDTO::createList)
+                            .map(device_infoDTOS -> {
+                                deviceDTO.setDevice_infoResponseModels(device_infoDTOS);
+                                return device_infoDTOS;
+                            })
+                            .block();
+                    return deviceDTO;
+                });
+    }
+
 //    /**
 //     * Получение Девайса по :id
 //     * @param id :id Девайса

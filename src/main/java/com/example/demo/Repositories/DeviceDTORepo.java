@@ -6,6 +6,7 @@ import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -78,5 +79,18 @@ public interface DeviceDTORepo extends ReactiveCrudRepository<DeviceDTO, Long> {
             "\torder by data_of_create DESC\n" +
             "\tlimit 24")
     Flux<DeviceDTO> findTop24();
+
+    @Query(value = "select od.id,\n" +
+            "\t   od.data_of_create,\n" +
+            "\t   od.is_name,\n" +
+            "\t   od.\"name\",\n" +
+            "\t   od.path_file,\n" +
+            "\t   od.price,\n" +
+            "\t   ob.\"name\" as brand_name,\n" +
+            "\t   ot.\"name\" as type_name\n" +
+            "\tfrom os_device od join os_brand ob ON ob.id = od.brand_id\n" +
+            "\tjoin os_type ot ON ot.id = ob.type_id\n" +
+            "\twhere od.id = :id;")
+    Mono<DeviceDTO> getById(@Param("id") Long id);
 
 }
