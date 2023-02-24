@@ -66,7 +66,7 @@ public class DeviceController {
             @ApiParam(hidden = true)
             @RequestPart("characteristic") String list
             ){
-        return deviceService.addDevice(brand, type, file, ref, name, price, list);
+        return deviceService.addDevice(null, brand, type, file, ref, name, price, list);
     }
 
 
@@ -135,52 +135,53 @@ public class DeviceController {
     }
 
 
-//    @ApiOperation(value = "Изменение девайсов")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 201, message = "Created"),
-//            @ApiResponse(code = 400, message = "Incorrect JSON"),
-//            @ApiResponse(code = 400, message = "This name of Device already exists"),
-//            @ApiResponse(code = 400, message = "This Type doesn't exist"),
-//            @ApiResponse(code = 400, message = "This Brand of this Type doesn't exist"),
-//            @ApiResponse(code = 400, message = "Incorrect image extension")
-//    })
-//    @PutMapping(value = "/edit", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-//    public void editDevice(
-//
-//            @ApiParam(
-//                    name = "Device",
-//                    value = "Все данные о девайсе:\nid - :id существующего Девайса, который желаем изменить" +
-//                            "\nbrand - Бренд, к которому будет принадлежать Девайс" +
-//                            "\ntype - Тип, к которому будет принадлежать Девайс\nname - название Девайса" +
-//                            "\nprice - цена Девайса\nОдно из двух(imgFile или imgRef):\nimgFile - файл-фото\n" +
-//                            "imgRef - путь до изображения из инета\n" +
-//                            "characteristic - характеристики Девайса\nid - :id характеристики" +
-//                            "\ntitle - титл\ndescription - описание",
-//                    example = "{{\nid:\"\"\nbrand: \"\",\ntype: \"\",\nname: \"Iphone 12 pro\", \n" +
-//                            "price: \"25000\" , \n    imgFile: *Файл*\n        /\n" +
-//                            "    imgRef: *путь до изображения*\ncharacteristic: [\n" +
-//                            "     {\n       id: \"\"\n       title: \"\"\n       description: \"\"\n" +
-//                            "     },\n     {...}\n]\n}}",
-//                    required = true
-//            )
-//            @RequestParam(value = "imgFile", required = false) MultipartFile file,
-//            @ApiParam(hidden = true)
-//            @RequestParam("id") String id,
-//            @ApiParam(hidden = true)
-//            @RequestParam("brand") String brand,
-//            @ApiParam(hidden = true)
-//            @RequestParam("type") String type,
-//            @ApiParam(hidden = true)
-//            @RequestParam(value = "imgRef", required = false) String ref,
-//            @ApiParam(hidden = true)
-//            @RequestParam("name") String name,
-//            @ApiParam(hidden = true)
-//            @RequestParam("price") String price,
-//            @ApiParam(hidden = true)
-//            @RequestParam("characteristic") JSONArray list) {
-//        deviceService.editDevice(id, brand, type, ref,file, name, price, list);
-//    }
+    @ApiOperation(value = "Изменение девайсов")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 400, message = "Incorrect JSON"),
+            @ApiResponse(code = 400, message = "This name of Device already exists"),
+            @ApiResponse(code = 400, message = "This Type doesn't exist"),
+            @ApiResponse(code = 400, message = "This Brand of this Type doesn't exist"),
+            @ApiResponse(code = 400, message = "Incorrect image extension")
+    })
+    @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping(value = "/edit", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public Mono<Void> editDevice(
+
+            @ApiParam(
+                    name = "Device",
+                    value = "Все данные о девайсе:\nid - :id существующего Девайса, который желаем изменить" +
+                            "\nbrand - Бренд, к которому будет принадлежать Девайс" +
+                            "\ntype - Тип, к которому будет принадлежать Девайс\nname - название Девайса" +
+                            "\nprice - цена Девайса\nОдно из двух(imgFile или imgRef):\nimgFile - файл-фото\n" +
+                            "imgRef - путь до изображения из инета\n" +
+                            "characteristic - характеристики Девайса\nid - :id характеристики" +
+                            "\ntitle - титл\ndescription - описание",
+                    example = "{{\nid:\"\"\nbrand: \"\",\ntype: \"\",\nname: \"Iphone 12 pro\", \n" +
+                            "price: \"25000\" , \n    imgFile: *Файл*\n        /\n" +
+                            "    imgRef: *путь до изображения*\ncharacteristic: [\n" +
+                            "     {\n       id: \"\"\n       title: \"\"\n       description: \"\"\n" +
+                            "     },\n     {...}\n]\n}}",
+                    required = true
+            )
+            @RequestPart(value = "imgFile", required = false) MultipartFile file,
+            @ApiParam(hidden = true)
+            @RequestPart("id") String id,
+            @ApiParam(hidden = true)
+            @RequestPart("brand") String brand,
+            @ApiParam(hidden = true)
+            @RequestPart("type") String type,
+            @ApiParam(hidden = true)
+            @RequestPart(value = "imgRef", required = false) String ref,
+            @ApiParam(hidden = true)
+            @RequestPart("name") String name,
+            @ApiParam(hidden = true)
+            @RequestPart("price") String price,
+            @ApiParam(hidden = true)
+            @RequestPart("characteristic") String list) {
+        return deviceService.editDevice(id, brand, type, ref,file, name, price, list);
+    }
 
 
     @ApiOperation(value = "Получение девайса по :id")

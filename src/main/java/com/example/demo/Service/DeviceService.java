@@ -45,15 +45,6 @@ public class DeviceService {
     @Autowired
     DeviceDTOListRepo deviceDTOListRepo;
 
-
-//    @Autowired
-//    BrandService brandService;
-//    @Autowired
-//    TypeService typeService;
-//    @Autowired
-//    Device_infoService device_infoService;
-
-
     /**
      * Добавление Девайса
      *
@@ -72,7 +63,8 @@ public class DeviceService {
      * @code 400 - This Brand (%s) of this Type (%s) doesn't exist
      * @code 400 - Incorrect image extension
      */
-    public Mono<Void> addDevice(String brandName,
+    public Mono<Void> addDevice(String id,
+                          String brandName,
                           String typeName,
                           MultipartFile file,
                           String ref,
@@ -92,11 +84,17 @@ public class DeviceService {
                 .flatMap(tuple2 -> {
                     Type type = tuple2.getT1();
                     Brand brand = tuple2.getT2();
-                    Device device = createBodyOfDevice(brand.getId(), type.getId(), file, ref, name, price);
-                    if(device == null)
-                        return Mono.error(new CustomException("Incorrect image extension"));
+                    Device device = createBodyOfDevice(id, brand.getId(), type.getId(), file, ref, name, price);
 
-                    return deviceRepository
+                    if(id != null)
+                        return deviceRepository
+                                .findById(Long.valueOf(id))
+                                .switchIfEmpty(Mono.error(new CustomException("Device with this :id doesn't exist")))
+                                .flatMap(dFromDB -> deviceRepository.save(device))
+                                .onErrorResume(throwable -> Mono.error(new CustomException("This name of Device already exists")))
+                                .flatMap(savedDevice -> createDeviceInfoAndSaveInDB(list, device.getId()));
+
+                    else return deviceRepository
                             .save(device)
                             .onErrorResume(throwable -> Mono.error(new CustomException("This name of Device already exists")))
                             .flatMap(savedDevice -> createDeviceInfoAndSaveInDB(list, device.getId()));
@@ -104,13 +102,18 @@ public class DeviceService {
                 .then(Mono.empty());
     }
 
-    private Device createBodyOfDevice(Long brandId,
+    @SneakyThrows
+    private Device createBodyOfDevice(String id,
+                                      Long brandId,
                                       Long typeId,
                                       MultipartFile file,
                                       String ref,
                                       String name,
                                       String price){
         Device device = new Device();
+        if(id != null)
+            device.setId(Long.valueOf(id));
+
         if(file != null) {
             String startName = StaticMethods.getFileExtension(file.getOriginalFilename());
             if(startName==null || (
@@ -122,7 +125,7 @@ public class DeviceService {
                             && !startName.equals("wbmp")
                             && !startName.equals("webp"))
             ){
-                return null;
+                throw new CustomException("Incorrect image extension");
             }
 
             String uuid = UUID.randomUUID().toString();
@@ -285,56 +288,6 @@ public class DeviceService {
                         return deviceDTOList;
                     });
         }
-//            brands = brands.stream().distinct().collect(Collectors.toList());
-//            for(String brand: brands) {
-//
-//                Type typeParent = typeService.findByName(type);
-//                Brand brandParent = brandService.findByNameAndTypeId(brand, typeParent);
-//                list.addAll(deviceRepository.findAllByTypeIdAndBrandId(typeParent, brandParent));
-//            }
-//
-//            if(list.isEmpty()){
-//                StaticMethods.createResponse(400,"Devices with this brands doesn't exists");
-//                return null;
-//            }
-//        }
-//
-//
-//        // Девайс с максимальной ценой в этом листе
-//        Optional<Device> deviceWithMaxPrice = list.stream().max(Comparator.comparing(o -> Integer.valueOf(o.getPrice())));
-//
-//        // Девайс с минимальной ценой в этом листе
-//        Optional<Device> deviceWithMinPrice = list.stream().min(Comparator.comparing(o -> Integer.valueOf(o.getPrice())));
-//
-//        list = selectionByPrice(list, minPrice, maxPrice);
-//
-//        if(list.isEmpty()){
-//            StaticMethods.createResponse(400,"Devices with this price doesn't exists");
-//            return null;
-//        }
-//
-//        // Сортировка по дате создания
-//        list.sort((o1, o2) -> o2.getDataOfCreate().compareTo(o1.getDataOfCreate()));
-//
-//        int amountOfAllDevices = list.size();
-//
-//        // Определение границ эл. в листе исходя из количества отображаемых эл. на стр. и номера стр.
-//        int fromIndex = (page - 1) * limit;
-//        int toIndex = page * limit;
-//        if(fromIndex >= list.size()){
-//            StaticMethods.createResponse(400,"Incorrect data of page or limit");
-//            return null;
-//        }
-//        if(toIndex > list.size()){
-//            toIndex = list.size();
-//        }
-//
-//        List<DeviceDTO> listDTO = DeviceDTO.createList(list.subList(fromIndex, toIndex));
-//
-//        return new DeviceWithNecessaryParameters(listDTO,
-//                amountOfAllDevices,
-//                deviceWithMaxPrice.orElse(null).getPrice(),
-//                deviceWithMinPrice.orElse(null).getPrice());
     }
 
 
@@ -449,44 +402,37 @@ public class DeviceService {
 //        }
 //        return device;
 //    }
-//
-//
-//    /**
-//     * Метод для изменение Девайса по :id
-//     * @param id :id существующего Девайса, который желаем изменить
-//     * @param brand название Бренда, к которому будет относится Девайс
-//     * @param type название Типа, к которому будет относится Девайс
-//     * @param file картинка в битовом представление (ава Девайса)
-//     * @param ref ссылка на картинку (ава Девайса)
-//     * @param name название Девайса
-//     * @param price цена Девайса
-//     *
-//     * @code 201 - Created
-//     * @code 400 - Incorrect JSON
-//     * @code 400 - This name of Device already exists
-//     * @code 400 - This Type doesn't exist
-//     * @code 400 - This Brand (%s) of this Type (%s) doesn't exist
-//     * @code 400 - Incorrect image extension
-//     * @code 400 - Device with this :id doesn't exist
-//     */
-//    public void editDevice(String id,
-//                           String brand,
-//                           String type,
-//                           String ref,
-//                           MultipartFile file,
-//                           String name,
-//                           String price,
-//                           JSONArray list) {
-//
-//        Device device = deviceRepository.findById(Long.valueOf(id)).orElse(null);
-//        if(device == null){
-//            StaticMethods.createResponse(400, "Device with this :id doesn't exist");
-//            return;
-//        }
-//
-//        createDeviceAndSaveInDB(device, brand, type, file, ref, name, price);
-//        createDeviceInfoAndSaveInDB(list, device);
-//    }
+
+
+    /**
+     * Метод для изменение Девайса по :id
+     * @param id :id существующего Девайса, который желаем изменить
+     * @param brand название Бренда, к которому будет относится Девайс
+     * @param type название Типа, к которому будет относится Девайс
+     * @param file картинка в битовом представление (ава Девайса)
+     * @param ref ссылка на картинку (ава Девайса)
+     * @param name название Девайса
+     * @param price цена Девайса
+     *
+     * @code 201 - Created
+     * @code 400 - Incorrect JSON
+     * @code 400 - This name of Device already exists
+     * @code 400 - This Type doesn't exist
+     * @code 400 - This Brand (%s) of this Type (%s) doesn't exist
+     * @code 400 - Incorrect image extension
+     * @code 400 - Device with this :id doesn't exist
+     */
+    public Mono<Void> editDevice(String id,
+                           String brand,
+                           String type,
+                           String ref,
+                           MultipartFile file,
+                           String name,
+                           String price,
+                           String list) {
+
+        return addDevice(id, brand, type, file, ref, name, price, list);
+    }
 
     public Flux<DeviceDTO> getTopDevices() {
 
@@ -505,10 +451,5 @@ public class DeviceService {
                             .block();
                     return deviceDTO;
                 });
-
-//        List<Device> list = deviceRepository.findAll();
-//        list.sort((o1, o2) -> o2.getDataOfCreate().compareTo(o1.getDataOfCreate()));
-//        list = list.subList(0, Math.min(list.size(), 24));
-//        return DeviceDTO.createList(list);
     }
 }
