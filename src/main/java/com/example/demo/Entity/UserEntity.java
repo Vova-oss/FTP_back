@@ -24,7 +24,7 @@ public class UserEntity {
     @ApiModelProperty(notes = "Email пользователя", name = "telephoneNumber", required = true, example = "first@mail.ru")
     @NumberFormat
     @NotNull
-    @Column(value = "telephoneNumber")
+    @Column(value = "telephone_number")
     private String telephoneNumber;
 
 

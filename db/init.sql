@@ -30,6 +30,7 @@ alter table if exists os_rating add constraint FK4kfx297r0link2dxqtppo6uaq forei
 alter table if exists os_refresh_token add constraint FKc5eff31geb3nbm4wf3by4u5sw foreign key (user_id) references os_users;
 alter table if exists os_roles_user_entities add constraint FKrlnrhrcd3ej31xm1vmrdebgg1 foreign key (role_id) references os_role;
 alter table if exists os_roles_user_entities add constraint FKl32gfivab3akfy5nyfeyjlrrf foreign key (user_id) references os_users;
+alter table if exists os_roles_user_entities add constraint ZKl3sdf432svbkfy5nyfeyjlrrf unique (user_id, role_id);
 
 
 insert into os_role(role) values ('ADMIN');

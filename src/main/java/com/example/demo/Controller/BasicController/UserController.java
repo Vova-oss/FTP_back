@@ -1,47 +1,45 @@
-//package com.example.demo.Controller.BasicController;
-//
-//import com.example.demo.DTO.UserDTO;
-//import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
-//import com.example.demo.Service.UserService;
-//import io.swagger.annotations.*;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
-//
-//
-//@Api(tags = "User")
-//@RestController
-//@CrossOrigin("http://localhost:3000")
-//@RequestMapping("/user")
-//public class UserController {
-//
-//    @Autowired
-//    UserService userService;
-//
-//
-//    @ApiOperation(value = "Регистрация пользователя")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 201, message = "Created"),
-//            @ApiResponse(code = 400, message = "Incorrect JSON"),
-//            @ApiResponse(code = 400, message = "User with this telephoneNumber already exist"),
-//            @ApiResponse(code = 400, message = "Json-формат со следующими полями:\nfield - лист полей, к которым " +
-//                    "относятся ошибки\ninfo - характеристика каждой ошибки")
-//    })
-//    @PostMapping("/registration")
-//    public void registration(
-//            @ApiParam(type = "String",
-//                      value = "ФИО, Телефонный номер и пароль",
-//                      example = "{\n\"FIO\":\"Полетаев Владимир Викторович\", " +
-//                              "\n\"telephoneNumber\": \"+79645932177\",\n\"password\": \"password\"}",
-//                      required = true)
-//            @RequestBody String body){
-//        userService.addUser(body);
-//    }
-//
+package com.example.demo.Controller.BasicController;
+
+import com.example.demo.Entity.UserEntity;
+import com.example.demo.Service.UserService;
+import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+
+@Api(tags = "User")
+@RestController
+@CrossOrigin("http://localhost:3000")
+@RequestMapping("/user")
+public class UserController {
+
+    @Autowired
+    UserService userService;
+
+
+    @ApiOperation(value = "Регистрация пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "Created"),
+            @ApiResponse(code = 400, message = "Incorrect JSON"),
+            @ApiResponse(code = 400, message = "User with this telephoneNumber already exist"),
+            @ApiResponse(code = 400, message = "Json-формат со следующими полями:\nfield - лист полей, к которым " +
+                    "относятся ошибки\ninfo - характеристика каждой ошибки")
+    })
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/registration")
+    public Mono<Void> registration(
+            @ApiParam(type = "String",
+                      value = "ФИО, Телефонный номер и пароль",
+                      example = "{\n\"FIO\":\"Полетаев Владимир Викторович\", " +
+                              "\n\"telephoneNumber\": \"+79645932177\",\n\"password\": \"password\"}",
+                      required = true)
+            @RequestBody String body){
+        return userService.addUser(body);
+    }
+
 //    @ApiOperation(value = "Подтверждение кода")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),
@@ -186,5 +184,5 @@
 //    public void delete(@RequestBody String telephoneNumber){
 //        userService.deleteByTelephoneNumber(telephoneNumber);
 //    }
-//
-//}
+
+}

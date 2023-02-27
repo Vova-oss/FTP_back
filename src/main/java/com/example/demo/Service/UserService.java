@@ -1,37 +1,23 @@
-//package com.example.demo.Service;
-//
-//import com.auth0.jwt.JWT;
-//import com.auth0.jwt.algorithms.Algorithm;
-//import com.auth0.jwt.exceptions.JWTDecodeException;
-//import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-//import com.example.demo.DTO.UserDTO;
-//import com.example.demo.Entity.Enum.ERoles;
-//import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
-//import com.example.demo.Entity.Role;
-//import com.example.demo.Entity.UserEntity;
-//import com.example.demo.Repositories.UserRepository;
-//import com.example.demo.Security.Service.JWTokenService;
-//import com.example.demo.Singleton.SingletonOne;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.stereotype.Service;
-//import org.springframework.web.server.ResponseStatusException;
-//
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//import static com.example.demo.Security.SecurityConstants.*;
-//
-//@Service
-//public class UserService {
-//
-//    @Autowired
-//    UserRepository userRepository;
-//
+package com.example.demo.Service;
+
+import com.example.demo.Controller.AuxiliaryClasses.CustomException;
+import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
+import com.example.demo.Entity.Roles_Users;
+import com.example.demo.Entity.UserEntity;
+import com.example.demo.Repositories.Roles_UsersRepo;
+import com.example.demo.Repositories.UserRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+
+@Service
+public class UserService {
+
+    @Autowired
+    UserRepo userRepo;
+    @Autowired
+    Roles_UsersRepo roles_usersRepo;
+
 //    @Autowired
 //    RoleService roleService;
 //    @Autowired
@@ -43,53 +29,60 @@
 //
 //    @Autowired
 //    BCryptPasswordEncoder bCryptPasswordEncoder;
-//
-//    /**
-//     * Добавление пользователя
-//     * @param body [json] поля сущности UserEntity
-//     * @code 201 - Created
-//     * @code 400 - Incorrect JSON
-//     * @code 400 - User with this telephoneNumber already exist
-//     * @code 400 - Incorrect validation (ValidationService.class)
-//     */
-//    public void addUser(String body) {
-//
-//        String fio = StaticMethods.parsingJson(body, "FIO");
-//        String password = StaticMethods.parsingJson(body, "password");
-//        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
-//
-//        if(fio == null || password == null || telephoneNumber == null)
-//            return;
-//
-//        UserEntity userEntity = findByTelephoneNumber(telephoneNumber);
-//        if(userEntity != null && userEntity.getTimeOfCreation() == null) {
-//            StaticMethods.createResponse(400,"User with this telephoneNumber already exist");
-//            return;
-//        }
-//        if(userEntity == null)
-//            userEntity = new UserEntity();
-//
-//        List<Role> role = new ArrayList<>();
-//        role.add(roleService.findByRole(ERoles.valueOf("USER")));
-//        userEntity.setTelephoneNumber(telephoneNumber);
-//        userEntity.setRoles(role);
+
+    /**
+     * Добавление пользователя
+     * @param body [json] поля сущности UserEntity
+     * @code 201 - Created
+     * @code 400 - Incorrect JSON
+     * @code 400 - User with this telephoneNumber already exist
+     * @code 400 - Incorrect validation (ValidationService.class)
+     */
+    public Mono<Void> addUser(String body) {
+        String fio = StaticMethods.parsingJson(body, "FIO");
+        String password = StaticMethods.parsingJson(body, "password");
+        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
+
+        if(fio == null || password == null || telephoneNumber == null)
+            return Mono.error(() -> new CustomException("Some of the required fields are empty"));
+
+        return userRepo
+                .findByTelephoneNumber(telephoneNumber)
+                .switchIfEmpty(
+                        Mono.just(createUserForAdd(null, telephoneNumber, password, fio))
+                )
+                .flatMap(userEntity -> {
+                    if(userEntity != null && userEntity.getTimeOfCreation() == null)
+                        return Mono.error(new CustomException("User with this telephoneNumber already exist"));
+                    userEntity = createUserForAdd(userEntity, telephoneNumber, password, fio);
+                    return userRepo.save(userEntity);
+                })
+                .flatMap(userEntity -> {
+                    return roles_usersRepo.addRelation(userEntity.getId(), 2L)
+                            .onErrorComplete();
+                })
+                .then(Mono.empty());
+    }
+
+    private UserEntity createUserForAdd(UserEntity userEntity, String telephoneNumber, String password, String fio){
+        if(userEntity == null)
+            userEntity = new UserEntity();
+        userEntity.setTelephoneNumber(telephoneNumber);
+        // ----------------- Нужно добавить кодирование при добавление Security --------------------------------------------- !!!!!!!!!!!!!!!!!!!
 //        userEntity.setPassword(bCryptPasswordEncoder.encode(password));
-//        userEntity.setFIO(fio);
-//        userEntity.setTimeOfCreation(System.currentTimeMillis());
-//
-//        // ------Реальный рандомный код. Теперь 111111, тк рассылка отключена (См. ниже) ----------------------------------------!!!!!!!!!!!!!!!!!!!
-////        userEntity.setCode((int) (Math.random() * 1_000_000));
-//        userEntity.setCode(111111);
-//
-//        userEntity.setIsMan(null);
-//        userEntity.setVerification(false);
-//        userRepository.save(userEntity);
-//
-//        // ------------Отправка кода через сообщение. Отключено, ибо списывает деньги)) -------------------------------------------------------!!!!!!!!!!!!!!!!
-////        sendingSMS.createSMS(userEntity.getTelephoneNumber(), String.valueOf(userEntity.getCode()));
-//
-//        StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "Created");
-//    }
+        userEntity.setPassword(password);
+        userEntity.setFIO(fio);
+        userEntity.setTimeOfCreation(System.currentTimeMillis());
+
+        // ------Реальный рандомный код. Теперь 111111, тк рассылка отключена (См. ниже) ----------------------------------------!!!!!!!!!!!!!!!!!!!
+//        userEntity.setCode((int) (Math.random() * 1_000_000));
+        userEntity.setCode(111111);
+
+        userEntity.setIsMan(null);
+        userEntity.setVerification(false);
+        return userEntity;
+    }
+
 //
 //
 //    /**
@@ -268,4 +261,4 @@
 //        UserEntity userEntity = userRepository.findByTelephoneNumber(telephoneNumber);
 //        return UserDTO.createUserDTO(userEntity);
 //    }
-//}
+}
