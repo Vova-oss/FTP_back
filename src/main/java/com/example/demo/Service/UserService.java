@@ -6,6 +6,7 @@ import com.example.demo.Entity.Roles_Users;
 import com.example.demo.Entity.UserEntity;
 import com.example.demo.Repositories.Roles_UsersRepo;
 import com.example.demo.Repositories.UserRepo;
+import com.example.demo.Singleton.SingletonOne;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -130,20 +131,46 @@ public class UserService {
 //        return ResponseEntity.status(400).body(new ResponseClass(400, "Incorrect JWT token", request.getServletPath()));
 //
 //    }
+
+
+    /**
+     * Подтверждение кода, который пришёл по СМС на указанный при регистрации телефонный номер
+     * @param body [json]:
+     *             telephoneNumber - телефонный номер;
+     *             code - код.
+     * @code 201 - Code is confirmed
+     * @code 400 - Incorrect JSON
+     * @code 400 - User with this :telephoneNumber doesn't exist
+     * @code 400 - Incorrect code
+     * @code 400 - Code has already been confirmed
+     */
+    public Mono<Void> codeConfirmation(String body) {
+        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
+        String code = StaticMethods.parsingJson(body, "code");
+        if(code == null || telephoneNumber == null)
+            return Mono.error(() -> new CustomException("Some of the required fields are empty"));
+
+        return userRepo
+                .findByTelephoneNumber(telephoneNumber)
+                .switchIfEmpty(Mono.error(() -> new CustomException("User with this :telephoneNumber doesn't exist")))
+                .flatMap(userEntity -> {
+                    if (userEntity.getCode() != null && userEntity.getCode() == Integer.parseInt(code)) {
+                        userEntity.setCode(null);
+                        userEntity.setTimeOfCreation(null);
+                        userEntity.setVerification(true);
+                        return userRepo.save(userEntity);
+                    } else {
+                        if (userEntity.getCode() == null)
+                            return Mono.error(() -> new CustomException("Code has already been confirmed"));
+                        else
+                            return Mono.error(() -> new CustomException("Incorrect code"));
+                    }
+                })
+                .then(Mono.empty());
+
 //
 //
-//    /**
-//     * Подтверждение кода, который пришёл по СМС на указанный при регистрации телефонный номер
-//     * @param body [json]:
-//     *             telephoneNumber - телефонный номер;
-//     *             code - код.
-//     * @code 201 - Code is confirmed
-//     * @code 400 - Incorrect JSON
-//     * @code 400 - User with this :telephoneNumber doesn't exist
-//     * @code 400 - Incorrect code
-//     * @code 400 - Code has already been confirmed
-//     */
-//    public void codeConfirmation(String body) {
+//
 //
 //        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
 //        String code = StaticMethods.parsingJson(body, "code");
@@ -170,9 +197,8 @@ public class UserService {
 //                    StaticMethods.createResponse(400, "Incorrect code");
 //            }
 //        }
-//
-//    }
-//
+    }
+
 //    public void sendSMSForPasswordRecovery(String body) {
 //
 //        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");

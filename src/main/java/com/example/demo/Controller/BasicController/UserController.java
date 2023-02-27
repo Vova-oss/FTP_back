@@ -40,28 +40,26 @@ public class UserController {
         return userService.addUser(body);
     }
 
-//    @ApiOperation(value = "Подтверждение кода")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 201, message = "Code is confirmed"),
-//            @ApiResponse(code = 400, message = "Incorrect JSON"),
-//            @ApiResponse(code = 400, message = "User with this :telephoneNumber doesn't exist"),
-//            @ApiResponse(code = 400, message = "Incorrect code"),
-//            @ApiResponse(code = 400, message = "Code has already been confirmed")
-//    })
-////    @CrossOrigin("*")
-//    @PutMapping("/codeConfirmation")
-//    public void codeConfirmation(
-//            @ApiParam(type = "String",
-//                    value = "Телефонный номер и код подтверждения",
-//                    example = "{\n\"telephoneNumber\": \"+79645932177\",\n\"code\": \"468175\"}",
-//                    required = true)
-//            @RequestBody String body){
-//
-//        userService.codeConfirmation(body);
-//
-//    }
-//
+    @ApiOperation(value = "Подтверждение кода")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "Code is confirmed"),
+            @ApiResponse(code = 400, message = "Incorrect JSON"),
+            @ApiResponse(code = 400, message = "User with this :telephoneNumber doesn't exist"),
+            @ApiResponse(code = 400, message = "Incorrect code"),
+            @ApiResponse(code = 400, message = "Code has already been confirmed")
+    })
+    @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping("/codeConfirmation")
+    public Mono<Void> codeConfirmation(
+            @ApiParam(type = "String",
+                    value = "Телефонный номер и код подтверждения",
+                    example = "{\n\"telephoneNumber\": \"+79645932177\",\n\"code\": \"468175\"}",
+                    required = true)
+            @RequestBody String body){
+        return userService.codeConfirmation(body);
+    }
+
 //    @ApiOperation(value = "Отправка кода по указанному номеру для восстановления пароля")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),
