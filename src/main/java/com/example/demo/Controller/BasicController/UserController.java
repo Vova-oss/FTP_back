@@ -1,10 +1,14 @@
 package com.example.demo.Controller.BasicController;
 
+import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
 import com.example.demo.Entity.UserEntity;
 import com.example.demo.Service.UserService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -96,17 +100,17 @@ public class UserController {
 //            HttpServletRequest request){
 //        userService.changePassword(body, request);
 //    }
-//
-//    @ApiOperation(value = "Проверка роли пользователя (Необходим JWT в хедере запроса)")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "OK"),
-//            @ApiResponse(code = 400, message = "Incorrect JWT token")
-//    })
-//    @GetMapping("/checkRole")
-//    public ResponseEntity<ResponseClass> checkRole(HttpServletRequest request){
-//        return userService.checkRole(request);
-//    }
-//
+
+    @ApiOperation(value = "Проверка роли пользователя (Необходим JWT в хедере запроса)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 400, message = "Incorrect JWT token")
+    })
+    @GetMapping("/checkRole")
+    public Mono<ResponseClass> checkRole(ServerHttpRequest request){
+        return userService.checkRole(request);
+    }
+
 //    @ApiOperation(value = "Проверка пароля на правильность (нужен jwt-token)")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),

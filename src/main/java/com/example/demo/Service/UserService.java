@@ -1,6 +1,10 @@
 package com.example.demo.Service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.example.demo.Controller.AuxiliaryClasses.CustomException;
+import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
 import com.example.demo.Entity.Roles_Users;
 import com.example.demo.Entity.UserEntity;
@@ -8,8 +12,13 @@ import com.example.demo.Repositories.Roles_UsersRepo;
 import com.example.demo.Repositories.UserRepo;
 import com.example.demo.Singleton.SingletonOne;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+import static com.example.demo.Security.SecurityConstants.*;
 
 @Service
 public class UserService {
@@ -103,34 +112,34 @@ public class UserService {
 //    public UserEntity findByTelephoneNumber(String telephoneNumber){
 //        return userRepository.findByTelephoneNumber(telephoneNumber);
 //    }
-//
-//
-//    /**
-//     * Проверка роли пользователя
-//     * @param request request, в котором должен быть jwToken
-//     * @code 200 - ResponseEntity<ResponseClass>
-//     * @code 400 - Incorrect JWT token
-//     */
-//    public ResponseEntity<ResponseClass> checkRole(HttpServletRequest request) {
-//
-//        String tokenWithPrefix = request.getHeader(HEADER_JWT_STRING);
-//        if(tokenWithPrefix!=null && tokenWithPrefix.startsWith(TOKEN_PREFIX)){
-//            String token = tokenWithPrefix.replace(TOKEN_PREFIX,"");
-//            try{
-//                String role = JWT.require(Algorithm.HMAC512(SECRET.getBytes()))
-//                        .build()
-//                        .verify(token)
-//                        .getClaim("role").asString();
-//
-//                return ResponseEntity.ok(new ResponseClass(200, role, request.getServletPath()));
-//            }catch (IllegalArgumentException | JWTDecodeException ignored){}
-//
-//        }
-//
-//
-//        return ResponseEntity.status(400).body(new ResponseClass(400, "Incorrect JWT token", request.getServletPath()));
-//
-//    }
+
+
+    /**
+     * Проверка роли пользователя
+     * @param request request, в котором должен быть jwToken
+     * @code 200 - ResponseEntity<ResponseClass>
+     * @code 400 - Incorrect JWT token
+     */
+    public Mono<ResponseClass> checkRole(ServerHttpRequest request) {
+        List<String> listHeaders = request.getHeaders().get(HEADER_JWT_STRING);
+        String tokenWithPrefix = null;
+        if(listHeaders != null)
+            tokenWithPrefix = listHeaders.get(0);
+
+        if(tokenWithPrefix != null && tokenWithPrefix.startsWith(TOKEN_PREFIX)){
+            String token = tokenWithPrefix.replace(TOKEN_PREFIX,"");
+            try{
+                String role = JWT.require(Algorithm.HMAC512(SECRET.getBytes()))
+                        .build()
+                        .verify(token)
+                        .getClaim("role").asString();
+
+                return Mono.just(new ResponseClass(200, role));
+            }catch (IllegalArgumentException | JWTDecodeException ignored){}
+
+        }
+        return Mono.error(() -> new CustomException("Incorrect JWT token"));
+    }
 
 
     /**
@@ -167,36 +176,6 @@ public class UserService {
                     }
                 })
                 .then(Mono.empty());
-
-//
-//
-//
-//
-//        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
-//        String code = StaticMethods.parsingJson(body, "code");
-//        if(code == null || telephoneNumber == null)
-//            return;
-//
-//        synchronized (SingletonOne.getSingleton()) {
-//            UserEntity userEntity = findByTelephoneNumber(telephoneNumber);
-//            if (userEntity == null) {
-//                StaticMethods.createResponse(400, "User with this :telephoneNumber doesn't exist");
-//                return;
-//            }
-//
-//            if (userEntity.getCode() != null && userEntity.getCode() == Integer.parseInt(code)) {
-//                userEntity.setCode(null);
-//                userEntity.setTimeOfCreation(null);
-//                userEntity.setVerification(true);
-//                userRepository.save(userEntity);
-//                StaticMethods.createResponse(201, "Code is confirmed");
-//            } else {
-//                if (userEntity.getCode() == null)
-//                    StaticMethods.createResponse(400, "Code has already been confirmed");
-//                else
-//                    StaticMethods.createResponse(400, "Incorrect code");
-//            }
-//        }
     }
 
 //    public void sendSMSForPasswordRecovery(String body) {
