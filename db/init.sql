@@ -9,10 +9,10 @@ create table os_order (id  bigserial not null, data_of_create int8, status varch
 create table os_order_device (id  bigserial not null, amount_of_product int8 not null, device_id int8, order_id int8, primary key (id));
 create table os_rating (id  bigserial not null, rate varchar(255), device_id int8, user_id int8, primary key (id));
 create table os_refresh_token (id  bigserial not null, expiry_date timestamp not null, token varchar(255) not null, user_id int8, primary key (id));
-create table os_role (id  bigserial not null, role varchar(255), primary key (id));
-create table os_roles_user_entities (user_id int8 not null, role_id int8 not null);
+-- create table os_role (id  bigserial not null, role varchar(255), primary key (id));
+-- create table os_roles_user_entities (user_id int8 not null, role_id int8 not null);
 create table os_type (id int8 not null, name varchar(255), primary key (id));
-create table os_users (id  bigserial not null, fio varchar(255), code int4, is_man boolean, password varchar(255), telephone_number varchar(255) not null, time_of_creation int8, verification boolean, primary key (id));
+create table os_users (id  bigserial not null, fio varchar(255), code int4, is_man boolean, password varchar(255), telephone_number varchar(255) not null, time_of_creation int8, verification boolean, role varchar(10), primary key (id));
 alter table if exists os_device add constraint UKbj4t7p0tggpag9wcmybi3pruq unique (name);
 alter table if exists os_refresh_token add constraint UK_hkuy0qblrwy6m2q69iphgw8nd unique (token);
 alter table if exists os_type add constraint UKkxil4qdacayg2fdxyi31tax0g unique (name);
@@ -28,15 +28,15 @@ alter table if exists os_order_device add constraint FK37p1rswsbum9jpbsfcx5u5v8i
 alter table if exists os_rating add constraint FKomedw8wlo4egsy1t0x8kvtgm2 foreign key (device_id) references os_device;
 alter table if exists os_rating add constraint FK4kfx297r0link2dxqtppo6uaq foreign key (user_id) references os_users;
 alter table if exists os_refresh_token add constraint FKc5eff31geb3nbm4wf3by4u5sw foreign key (user_id) references os_users;
-alter table if exists os_roles_user_entities add constraint FKrlnrhrcd3ej31xm1vmrdebgg1 foreign key (role_id) references os_role;
-alter table if exists os_roles_user_entities add constraint FKl32gfivab3akfy5nyfeyjlrrf foreign key (user_id) references os_users;
-alter table if exists os_roles_user_entities add constraint ZKl3sdf432svbkfy5nyfeyjlrrf unique (user_id, role_id);
+-- alter table if exists os_roles_user_entities add constraint FKrlnrhrcd3ej31xm1vmrdebgg1 foreign key (role_id) references os_role;
+-- alter table if exists os_roles_user_entities add constraint FKl32gfivab3akfy5nyfeyjlrrf foreign key (user_id) references os_users;
+-- alter table if exists os_roles_user_entities add constraint ZKl3sdf432svbkfy5nyfeyjlrrf unique (user_id, role_id);
 
 
-insert into os_role(role) values ('ADMIN');
-insert into os_role(role) values ('USER');
+-- insert into os_role(role) values ('ADMIN');
+-- insert into os_role(role) values ('USER');
 
-insert into os_users (fio, password, telephone_number, verification)
-VALUES ('admin', '$2a$12$tyQ6j.apGIh3f7FtmZRpFeAjkscr1hNHTmzGAa9StEpJJCdFjZPne', '+77777777777', true);
+insert into os_users (fio, password, telephone_number, verification, role)
+VALUES ('admin', '$2a$12$tyQ6j.apGIh3f7FtmZRpFeAjkscr1hNHTmzGAa9StEpJJCdFjZPne', '+77777777777', true, 'ADMIN');
 
-insert into os_roles_user_entities(user_id, role_id) values (1, 1);
+-- insert into os_roles_user_entities(user_id, role_id) values (1, 1);

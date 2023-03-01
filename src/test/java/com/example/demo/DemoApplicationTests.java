@@ -25,7 +25,7 @@ class DemoApplicationTests {
     void validationUserEntity(){
         UserEntity userEntity = new UserEntity();
         userEntity.setPassword(" ");
-        userEntity.setTelephoneNumber("");
+        userEntity.setUsername("");
         validationService.validation(userEntity);
     }
 
@@ -54,13 +54,13 @@ class DemoApplicationTests {
     @Test
     void testObjectLink(){
         UserEntity userEntity = new UserEntity();
-        userEntity.setTelephoneNumber("first@mail.com");
+        userEntity.setUsername("first@mail.com");
         changeEmail(userEntity);
-        System.out.println(userEntity.getTelephoneNumber());
+        System.out.println(userEntity.getUsername());
     }
 
     void changeEmail(UserEntity userEntity){
-        userEntity.setTelephoneNumber("second@mail.com");
+        userEntity.setUsername("second@mail.com");
     }
 
 

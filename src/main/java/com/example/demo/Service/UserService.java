@@ -6,13 +6,13 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.example.demo.Controller.AuxiliaryClasses.CustomException;
 import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-import com.example.demo.Entity.Roles_Users;
+import com.example.demo.Entity.Enum.ERoles;
 import com.example.demo.Entity.UserEntity;
-import com.example.demo.Repositories.Roles_UsersRepo;
 import com.example.demo.Repositories.UserRepo;
-import com.example.demo.Singleton.SingletonOne;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -21,12 +21,10 @@ import java.util.List;
 import static com.example.demo.Security.SecurityConstants.*;
 
 @Service
-public class UserService {
+public class UserService implements ReactiveUserDetailsService {
 
     @Autowired
     UserRepo userRepo;
-    @Autowired
-    Roles_UsersRepo roles_usersRepo;
 
 //    @Autowired
 //    RoleService roleService;
@@ -39,6 +37,12 @@ public class UserService {
 //
 //    @Autowired
 //    BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Override
+    public Mono<UserDetails> findByUsername(String username) {
+        return userRepo.findByUsername(username)
+                .cast(UserDetails.class);
+    }
 
     /**
      * Добавление пользователя
@@ -57,7 +61,7 @@ public class UserService {
             return Mono.error(() -> new CustomException("Some of the required fields are empty"));
 
         return userRepo
-                .findByTelephoneNumber(telephoneNumber)
+                .findByUsername(telephoneNumber)
                 .switchIfEmpty(
                         Mono.just(createUserForAdd(null, telephoneNumber, password, fio))
                 )
@@ -67,17 +71,13 @@ public class UserService {
                     userEntity = createUserForAdd(userEntity, telephoneNumber, password, fio);
                     return userRepo.save(userEntity);
                 })
-                .flatMap(userEntity -> {
-                    return roles_usersRepo.addRelation(userEntity.getId(), 2L)
-                            .onErrorComplete();
-                })
                 .then(Mono.empty());
     }
 
     private UserEntity createUserForAdd(UserEntity userEntity, String telephoneNumber, String password, String fio){
         if(userEntity == null)
             userEntity = new UserEntity();
-        userEntity.setTelephoneNumber(telephoneNumber);
+        userEntity.setUsername(telephoneNumber);
         // ----------------- Нужно добавить кодирование при добавление Security --------------------------------------------- !!!!!!!!!!!!!!!!!!!
 //        userEntity.setPassword(bCryptPasswordEncoder.encode(password));
         userEntity.setPassword(password);
@@ -88,6 +88,7 @@ public class UserService {
 //        userEntity.setCode((int) (Math.random() * 1_000_000));
         userEntity.setCode(111111);
 
+        userEntity.setRole(ERoles.USER);
         userEntity.setIsMan(null);
         userEntity.setVerification(false);
         return userEntity;
@@ -160,7 +161,7 @@ public class UserService {
             return Mono.error(() -> new CustomException("Some of the required fields are empty"));
 
         return userRepo
-                .findByTelephoneNumber(telephoneNumber)
+                .findByUsername(telephoneNumber)
                 .switchIfEmpty(Mono.error(() -> new CustomException("User with this :telephoneNumber doesn't exist")))
                 .flatMap(userEntity -> {
                     if (userEntity.getCode() != null && userEntity.getCode() == Integer.parseInt(code)) {
@@ -177,6 +178,7 @@ public class UserService {
                 })
                 .then(Mono.empty());
     }
+
 
 //    public void sendSMSForPasswordRecovery(String body) {
 //

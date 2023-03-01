@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Api(tags = "Device")
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/device")
 public class DeviceController {
