@@ -9,14 +9,22 @@ import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
 import com.example.demo.Entity.Enum.ERoles;
 import com.example.demo.Entity.UserEntity;
 import com.example.demo.Repositories.UserRepo;
+import com.example.demo.Security.Service.JWTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.example.demo.Security.SecurityConstants.*;
 
@@ -25,6 +33,11 @@ public class UserService implements ReactiveUserDetailsService {
 
     @Autowired
     UserRepo userRepo;
+    @Autowired
+    JWTokenService jwTokenService;
+
+    private final ResponseEntity<Object> UNAUTHORIZED
+            = ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
 //    @Autowired
 //    RoleService roleService;
@@ -32,11 +45,48 @@ public class UserService implements ReactiveUserDetailsService {
 //    ValidationService validationService;
 //    @Autowired
 //    SendingSMS sendingSMS;
-//    @Autowired
-//    JWTokenService jwTokenService;
 //
-//    @Autowired
-//    BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    PasswordEncoder bCryptPasswordEncoder;
+
+
+    public Mono<ResponseEntity<?>> login(String body) {
+        String telephoneNumber = StaticMethods.parsingJson(body, "telephoneNumber");
+        String password = StaticMethods.parsingJson(body, "password");
+
+        return findByUsername(telephoneNumber)
+                .cast(UserEntity.class)
+                .map(userEntity -> {
+                    if (!userEntity.getVerification()){
+                        return ResponseEntity
+                                .status(400)
+                                .body(new ResponseClass(
+                                        400,
+                                        "This account is not verified"
+                                ));
+                    }
+                    return  bCryptPasswordEncoder.matches(
+                            password,
+                            userEntity.getPassword()
+                    ) ? ResponseEntity.ok().header(
+                            HEADER_JWT_STRING, TOKEN_PREFIX +
+                                    jwTokenService.createJWT(
+                                            userEntity.getUsername(),
+                                            userEntity.getRole().name())
+
+                    ).build() : UNAUTHORIZED;
+                }).defaultIfEmpty(UNAUTHORIZED);
+    }
+
+    private ResponseEntity<?> setHeaderWithJWT(UserEntity userEntity){
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HEADER_JWT_STRING, TOKEN_PREFIX +
+                jwTokenService.createJWT(
+                        userEntity.getUsername(),
+                        userEntity.getRole().name())
+        );
+        return ResponseEntity.ok(httpHeaders);
+    }
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
@@ -79,8 +129,7 @@ public class UserService implements ReactiveUserDetailsService {
             userEntity = new UserEntity();
         userEntity.setUsername(telephoneNumber);
         // ----------------- Нужно добавить кодирование при добавление Security --------------------------------------------- !!!!!!!!!!!!!!!!!!!
-//        userEntity.setPassword(bCryptPasswordEncoder.encode(password));
-        userEntity.setPassword(password);
+        userEntity.setPassword(bCryptPasswordEncoder.encode(password));
         userEntity.setFIO(fio);
         userEntity.setTimeOfCreation(System.currentTimeMillis());
 
@@ -178,6 +227,8 @@ public class UserService implements ReactiveUserDetailsService {
                 })
                 .then(Mono.empty());
     }
+
+
 
 
 //    public void sendSMSForPasswordRecovery(String body) {

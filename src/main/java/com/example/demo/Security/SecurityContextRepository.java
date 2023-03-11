@@ -30,7 +30,7 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
         String authHeader = exchange.getRequest()
                 .getHeaders()
-                .getFirst(HttpHeaders.AUTHORIZATION);
+                .getFirst(HEADER_JWT_STRING);
 
         if(authHeader != null && authHeader.startsWith(TOKEN_PREFIX)){
             String authToken = authHeader.replace(TOKEN_PREFIX, "");

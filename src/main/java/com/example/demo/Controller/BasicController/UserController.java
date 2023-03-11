@@ -1,6 +1,7 @@
 package com.example.demo.Controller.BasicController;
 
 import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
+import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
 import com.example.demo.Entity.UserEntity;
 import com.example.demo.Security.Service.JWTokenService;
 import com.example.demo.Service.UserService;
@@ -9,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -25,11 +24,7 @@ public class UserController {
 
     @Autowired
     UserService userService;
-    @Autowired
-    JWTokenService jwTokenService;
 
-    private final ResponseEntity<Object> UNAUTHORIZED
-            = ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
     @ApiOperation(value = "Авторизация пользователя")
     @ApiResponses(value = {
@@ -40,24 +35,9 @@ public class UserController {
             @ApiResponse(code = 400, message = "Json-формат со следующими полями:\nfield - лист полей, к которым " +
                     "относятся ошибки\ninfo - характеристика каждой ошибки")
     })
-    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/login")
-    public Mono<ResponseEntity> login(ServerWebExchange swe){
-        return swe.getFormData().flatMap(credentials ->
-                userService.findByUsername(credentials.getFirst("username"))
-                        .cast(UserEntity.class)
-                        .map(userEntity ->
-                                        Objects.equals(
-                                                credentials.getFirst("password"),
-                                                userEntity.getPassword()
-                                        ) ? ResponseEntity.ok(
-                                                jwTokenService.createJWT(
-                                                        userEntity.getUsername(),
-                                                        userEntity.getRole().name())
-                                        ) : UNAUTHORIZED
-                                )
-                        .defaultIfEmpty(UNAUTHORIZED)
-        );
+    public Mono<ResponseEntity<?>> login(@RequestBody String body){
+        return userService.login(body);
     }
 
 
