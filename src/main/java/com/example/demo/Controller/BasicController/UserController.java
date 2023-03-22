@@ -130,26 +130,26 @@ public class UserController {
         return userService.checkRole(request);
     }
 
-//    @ApiOperation(value = "Проверка пароля на правильность (нужен jwt-token)")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 201, message = "Code has been sent"),
-//            @ApiResponse(code = 400, message = "Incorrect JSON\n" +
-//                    "User with this :telephoneNumber doesn't exist"),
-//    })
-//    @GetMapping("/checkPassword/{password}")
-//    public Boolean checkPassword(
-//            @ApiParam(type = "String",
-//                    value = "Пароль",
-//                    example = "password",
-//                    required = true)
-//            @PathVariable("password") String password,
-//            HttpServletRequest request){
-//
-//        return userService.checkPassword(password, request);
-//
-//    }
-//
+    @ApiOperation(value = "Проверка пароля на правильность (нужен jwt-token)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "Code has been sent"),
+            @ApiResponse(code = 400, message = "Incorrect JSON\n" +
+                    "User with this :telephoneNumber doesn't exist"),
+    })
+    @GetMapping("/checkPassword/{password}")
+    public Mono<Boolean> checkPassword(
+            @ApiParam(type = "String",
+                    value = "Пароль",
+                    example = "password",
+                    required = true)
+            @PathVariable("password") String password,
+            ServerHttpRequest request){
+
+        return userService.checkPassword(password, request);
+
+    }
+
 //    @ApiOperation(value = "Изменение пола (нужен jwt-token)")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),

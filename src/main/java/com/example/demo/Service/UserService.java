@@ -277,18 +277,36 @@ public class UserService implements ReactiveUserDetailsService {
 //    public void delete(UserEntity userEntity){
 //        userRepository.delete(userEntity);
 //    }
-//
-//    public Boolean checkPassword(String password, HttpServletRequest request) {
-//        String telephoneNumber = jwTokenService.
-//                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
-//        UserEntity userEntity = userRepository.findByTelephoneNumber(telephoneNumber);
-//        if(userEntity == null)
-//            return false;
-//
-//        return bCryptPasswordEncoder.matches(password, userEntity.getPassword());
-//    }
-//
-//
+
+    public Mono<Boolean> checkPassword(String password, ServerHttpRequest request) {
+        List<String> headersList = request.getHeaders().get(HEADER_JWT_STRING);
+        String tokenWithPrefix = null;
+        if(headersList != null)
+            tokenWithPrefix = headersList.get(0);
+
+        if(tokenWithPrefix != null) {
+            String telephoneNumber = jwTokenService.
+                    getNameFromJWT(tokenWithPrefix.replace(TOKEN_PREFIX, ""));
+
+            return userRepo
+                    .existsByUsername(telephoneNumber)
+                    .flatMap(
+                            aBoolean ->{
+                                if(aBoolean)
+                                    return userRepo
+                                        .findByUsername(telephoneNumber)
+                                        .map(userEntity ->
+                                                userEntity != null
+                                                        && bCryptPasswordEncoder.matches(password, userEntity.getPassword()));
+                                return Mono.just(false);
+                            }
+                    );
+        }
+
+        return Mono.error(() -> new CustomException("Authorization header is broken"));
+    }
+
+
 //    public void changeGender(String gender, HttpServletRequest request) {
 //        String telephoneNumber = jwTokenService.
 //                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
@@ -325,9 +343,18 @@ public class UserService implements ReactiveUserDetailsService {
             String telephoneNumber = jwTokenService.
                     getNameFromJWT(tokenWithPrefix.replace(TOKEN_PREFIX, ""));
 
+
             return userRepo
-                    .findByUsername(telephoneNumber)
-                    .map(UserDTO::createUserDTO);
+                    .existsByUsername(telephoneNumber)
+                    .flatMap(
+                            aBoolean ->{
+                                if(aBoolean)
+                                    return userRepo
+                                            .findByUsername(telephoneNumber)
+                                            .map(UserDTO::createUserDTO);
+                                return Mono.error(() -> new CustomException("Such user doesn't exist"));
+                            }
+                    );
         }
 
         return Mono.error(() -> new CustomException("Authorization header is broken"));
