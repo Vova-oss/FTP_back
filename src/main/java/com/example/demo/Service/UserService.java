@@ -6,6 +6,7 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.example.demo.Controller.AuxiliaryClasses.CustomException;
 import com.example.demo.Controller.AuxiliaryClasses.ResponseClass;
 import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.Entity.Enum.ERoles;
 import com.example.demo.Entity.UserEntity;
 import com.example.demo.Repositories.UserRepo;
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -312,11 +313,23 @@ public class UserService implements ReactiveUserDetailsService {
 //        userRepository.save(userEntity);
 //        StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "FIO has been changed");
 //    }
-//
-//    public UserDTO getInfoAboutUser(HttpServletRequest request) {
-//        String telephoneNumber = jwTokenService.
-//                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
-//        UserEntity userEntity = userRepository.findByTelephoneNumber(telephoneNumber);
-//        return UserDTO.createUserDTO(userEntity);
-//    }
+
+    public Mono<UserDTO> getInfoAboutUser(ServerHttpRequest request) {
+        List<String> headersList = request.getHeaders().get(HEADER_JWT_STRING);
+        String tokenWithPrefix = null;
+        if(headersList != null)
+            tokenWithPrefix = headersList.get(0);
+
+        if(tokenWithPrefix != null) {
+
+            String telephoneNumber = jwTokenService.
+                    getNameFromJWT(tokenWithPrefix.replace(TOKEN_PREFIX, ""));
+
+            return userRepo
+                    .findByUsername(telephoneNumber)
+                    .map(UserDTO::createUserDTO);
+        }
+
+        return Mono.error(() -> new CustomException("Authorization header is broken"));
+    }
 }
