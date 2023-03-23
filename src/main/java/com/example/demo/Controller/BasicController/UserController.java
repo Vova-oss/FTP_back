@@ -168,23 +168,24 @@ public class UserController {
         return userService.changeGender(gender, request);
     }
 
-//    @ApiOperation(value = "Изменение ФИО (нужен jwt-token)")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 201, message = "FIO has been changed"),
-//            @ApiResponse(code = 400, message = "Incorrect JSON")
-//    })
-//    @PutMapping("/changeFIO/{fio}")
-//    public void changeFIO(
-//            @ApiParam(type = "String",
-//                    value = "Новое ФИО пользователя",
-//                    example = "true",
-//                    required = true)
-//            @PathVariable("fio") String fio,
-//            HttpServletRequest request){
-//        userService.changeFio(fio, request);
-//    }
-//
+    @ApiOperation(value = "Изменение ФИО (нужен jwt-token)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "FIO has been changed"),
+            @ApiResponse(code = 400, message = "Incorrect JSON")
+    })
+    @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping("/changeFIO/{fio}")
+    public Mono<Void> changeFIO(
+            @ApiParam(type = "String",
+                    value = "Новое ФИО пользователя",
+                    example = "true",
+                    required = true)
+            @PathVariable("fio") String fio,
+            ServerHttpRequest request){
+        return userService.changeFio(fio, request);
+    }
+
     @ApiOperation(value = "Получение информации о пользователе (нужен jwt-token)")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "---"),

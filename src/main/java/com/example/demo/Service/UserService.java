@@ -302,7 +302,6 @@ public class UserService implements ReactiveUserDetailsService {
                             }
                     );
         }
-
         return Mono.error(() -> new CustomException("Authorization header is broken"));
     }
 
@@ -314,10 +313,8 @@ public class UserService implements ReactiveUserDetailsService {
             tokenWithPrefix = headersList.get(0);
 
         if(tokenWithPrefix != null) {
-
             String telephoneNumber = jwTokenService.
                     getNameFromJWT(tokenWithPrefix.replace(TOKEN_PREFIX, ""));
-
 
             return userRepo
                     .findByUsername(telephoneNumber)
@@ -328,21 +325,30 @@ public class UserService implements ReactiveUserDetailsService {
                     })
                     .then(Mono.empty());
         }
-
         return Mono.error(() -> new CustomException("Authorization header is broken"));
     }
 
-//    public void changeFio(String fio, HttpServletRequest request) {
-//        String telephoneNumber = jwTokenService.
-//                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
-//        UserEntity userEntity = userRepository.findByTelephoneNumber(telephoneNumber);
-//        if(userEntity == null)
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect jwt-token");
-//
-//        userEntity.setFIO(fio);
-//        userRepository.save(userEntity);
-//        StaticMethods.createResponse(HttpServletResponse.SC_CREATED, "FIO has been changed");
-//    }
+    public Mono<Void> changeFio(String fio, ServerHttpRequest request) {
+        List<String> headersList = request.getHeaders().get(HEADER_JWT_STRING);
+        String tokenWithPrefix = null;
+        if(headersList != null)
+            tokenWithPrefix = headersList.get(0);
+
+        if(tokenWithPrefix != null) {
+            String telephoneNumber = jwTokenService.
+                    getNameFromJWT(tokenWithPrefix.replace(TOKEN_PREFIX, ""));
+
+            return userRepo
+                    .findByUsername(telephoneNumber)
+                    .switchIfEmpty(Mono.error(new CustomException("Incorrect jwt-token")))
+                    .flatMap(userEntity -> {
+                        userEntity.setFIO(fio);
+                        return userRepo.save(userEntity);
+                    })
+                    .then(Mono.empty());
+        }
+        return Mono.error(() -> new CustomException("Authorization header is broken"));
+    }
 
     public Mono<UserDTO> getInfoAboutUser(ServerHttpRequest request) {
         List<String> headersList = request.getHeaders().get(HEADER_JWT_STRING);
@@ -351,10 +357,8 @@ public class UserService implements ReactiveUserDetailsService {
             tokenWithPrefix = headersList.get(0);
 
         if(tokenWithPrefix != null) {
-
             String telephoneNumber = jwTokenService.
                     getNameFromJWT(tokenWithPrefix.replace(TOKEN_PREFIX, ""));
-
 
             return userRepo
                     .existsByUsername(telephoneNumber)
@@ -368,7 +372,6 @@ public class UserService implements ReactiveUserDetailsService {
                             }
                     );
         }
-
         return Mono.error(() -> new CustomException("Authorization header is broken"));
     }
 }
