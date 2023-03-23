@@ -1,111 +1,132 @@
-//package com.example.demo.Service;
-//
-//
-//import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-//import com.example.demo.DTO.OrderDTO;
-//import com.example.demo.Entity.Device;
-//import com.example.demo.Entity.Enum.EStatusOfOrder;
-//import com.example.demo.Entity.Order;
-//import com.example.demo.Entity.UserEntity;
-//import com.example.demo.Repositories.OrderRepository;
-//import com.example.demo.Security.Service.JWTokenService;
-//import org.json.JSONArray;
-//import org.json.JSONException;
-//import org.json.JSONObject;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//
-//import javax.servlet.http.HttpServletRequest;
-//import java.util.List;
-//import java.util.Optional;
-//
-//import static com.example.demo.Security.SecurityConstants.HEADER_JWT_STRING;
-//import static com.example.demo.Security.SecurityConstants.TOKEN_PREFIX;
-//
-//@Service
-//public class OrderService {
-//
-//    @Autowired
-//    UserService userService;
-//    @Autowired
-//    DeviceService deviceService;
-//    @Autowired
-//    JWTokenService jwTokenService;
-//    @Autowired
-//    Order_deviceService order_deviceService;
-//    @Autowired
-//    ValidationService validationService;
-//
-//    @Autowired
-//    OrderRepository orderRepository;
-//
-//    /**
-//     * Добавление нового Заказа
-//     * @param body [json] содержит:
-//     *             totalSumCheck - общая сумма в заказе
-//     *             orderItems - массив Девайсов в заказе. Один элемент массива содержит:
-//     *                  id - :id Девайса
-//     *                  amount - их количество
-//     *
-//     * @code 201 - Created
-//     * @code 400 - Incorrect JSON
-//     * @code 400 - Incorrect validation (ValidationService.class)
-//     */
-//    public void addAnOrder(String body, HttpServletRequest request){
-//
-//        //Получение telephoneNumber текущего пользователя по токену
-//        String email = jwTokenService.
-//                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
-//        UserEntity user = userService.findByTelephoneNumber(email);
-//
-//        try {
-//
-//            JSONObject object = new JSONObject(body);
-//            JSONArray array = object.getJSONArray("orderItems");
-//            Long totalSumCheck = object.getLong("totalSumCheck");
-//
-//            Order order = createNewOrder(user, totalSumCheck);
-//            if(order == null)
-//                return;
-//
-//            for(int i = 0; i< array.length(); i++){
-//
-//                    JSONObject current = array.getJSONObject(i);
-//                    Device device = deviceService.getById(current.getString("id"));
-//                    if(device==null){
-//                        continue;
-//                    }
-//                    order_deviceService.save(order, device, current.getLong("amount"));
-//            }
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//            StaticMethods.createResponse(400, "Incorrect JSON");
-//            return;
-//        }
-//        StaticMethods.createResponse(201, "Created");
-//    }
-//
-//
-//    /**
-//     * Создание новой записи о Заказе в БД
-//     * @param user Пользователь, которому принадлежит данный Заказ
-//     * @param totalSumCheck общая сумма Заказа
-//     * @return созданный Заказ в БД (с :id)
-//     *
-//     * @code 400 - Incorrect validation (ValidationService.class)
-//     */
-//    public Order createNewOrder(UserEntity user, Long totalSumCheck){
-//        Order order = new Order();
-//        order.setUserId(user);
-//        order.setStatus(EStatusOfOrder.ACTIVE);
-//        order.setTotalSumCheck(totalSumCheck);
-//        order.setDataOfCreate(System.currentTimeMillis());
-//        if(!validationService.validation(user))
-//            return null;
-//        return orderRepository.save(order);
-//    }
-//
-//
+package com.example.demo.Service;
+
+
+import com.example.demo.Controller.AuxiliaryClasses.CustomException;
+import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
+import com.example.demo.Entity.Device;
+import com.example.demo.Entity.Enum.EStatusOfOrder;
+import com.example.demo.Entity.Order;
+import com.example.demo.Entity.Order_device;
+import com.example.demo.Entity.UserEntity;
+import com.example.demo.Repositories.OrderRepository;
+import com.example.demo.Repositories.UserRepo;
+import com.example.demo.Security.Service.JWTokenService;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.demo.Security.SecurityConstants.HEADER_JWT_STRING;
+import static com.example.demo.Security.SecurityConstants.TOKEN_PREFIX;
+
+@Service
+public class OrderService {
+
+    @Autowired
+    UserRepo userRepo;
+    @Autowired
+    DeviceService deviceService;
+    @Autowired
+    JWTokenService jwTokenService;
+    @Autowired
+    Order_deviceService order_deviceService;
+
+    @Autowired
+    OrderRepository orderRepository;
+
+    /**
+     * Добавление нового Заказа
+     * @param body [json] содержит:
+     *             totalSumCheck - общая сумма в заказе
+     *             orderItems - массив Девайсов в заказе. Один элемент массива содержит:
+     *                  id - :id Девайса
+     *                  amount - их количество
+     *
+     * @code 201 - Created
+     * @code 400 - Incorrect JSON
+     * @code 400 - Incorrect validation (ValidationService.class)
+     */
+    public Mono<Void> addAnOrder(String body, ServerHttpRequest request){
+        List<String> headersList = request.getHeaders().get(HEADER_JWT_STRING);
+        String tokenWithPrefix = null;
+        if(headersList != null)
+            tokenWithPrefix = headersList.get(0);
+
+        if(tokenWithPrefix != null) {
+            String telephoneNumber = jwTokenService.
+                    getNameFromJWT(tokenWithPrefix.replace(TOKEN_PREFIX, ""));
+
+            JSONObject object;
+            JSONArray array;
+            long totalSumCheck;
+            try {
+                object = new JSONObject(body);
+                array = object.getJSONArray("orderItems");
+                totalSumCheck = object.getLong("totalSumCheck");
+            } catch (JSONException e) {
+                return Mono.error(() -> new CustomException("Incorrect JSON"));
+            }
+
+            return userRepo
+                    .findByUsername(telephoneNumber)
+                    .switchIfEmpty(Mono.error(new CustomException("Incorrect jwt-token")))
+                    .flatMap(userEntity -> {
+                        return createAndSaveNewOrder(userEntity, totalSumCheck)
+                                .flatMap(order -> {
+                                    return createAndSaveOrder_device(array, order.getId()).then(Mono.empty());
+                                })
+                        ;
+                    })
+                    .then(Mono.empty());
+        }
+        return Mono.error(() -> new CustomException("Authorization header is broken"));
+    }
+
+
+    /**
+     * Создание новой записи о Заказе в БД
+     * @param user Пользователь, которому принадлежит данный Заказ
+     * @param totalSumCheck общая сумма Заказа
+     * @return созданный Заказ в БД (с :id)
+     *
+     * @code 400 - Incorrect validation (ValidationService.class)
+     */
+    public Mono<Order> createAndSaveNewOrder(UserEntity user, Long totalSumCheck){
+        Order order = new Order();
+        order.setUserId(user.getId());
+        order.setStatus(EStatusOfOrder.ACTIVE.name());
+        order.setTotalSumCheck(totalSumCheck);
+        order.setDataOfCreate(System.currentTimeMillis());
+        return orderRepository.save(order);
+    }
+
+    private Mono<Void> createAndSaveOrder_device(JSONArray array, Long orderId){
+        List<Order_device> order_devices = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject current;
+            try {
+                current = array.getJSONObject(i);
+                order_devices.add(order_deviceService.createOrder_device(
+                                orderId,
+                                Long.valueOf(current.getString("id")),
+                                current.getLong("amount")
+                        )
+                );
+            } catch (JSONException e) {
+                return Mono.error(() -> new CustomException("Incorrect JSON"));
+            }
+        }
+        return order_deviceService.saveAll(order_devices);
+    }
+
+
 //    /**
 //     * Получение всех Заказов (DTO) по Пользователю
 //     * @param request request, который должен содержать jwToken
@@ -174,4 +195,4 @@
 //        StaticMethods.createResponse(201, "Created");
 //
 //    }
-//}
+}
