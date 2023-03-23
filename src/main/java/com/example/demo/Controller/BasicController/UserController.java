@@ -150,25 +150,24 @@ public class UserController {
 
     }
 
-//    @ApiOperation(value = "Изменение пола (нужен jwt-token)")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "---"),
-//            @ApiResponse(code = 201, message = "Gender has been changed"),
-//            @ApiResponse(code = 400, message = "Incorrect JSON")
-//    })
-//    @PutMapping("/changeGender/{gender}")
-//    public void changeGender(
-//            @ApiParam(type = "Boolean",
-//                    value = "Пол, отвечающий на вопрос: Это мужчина? true - мужской, false - женский",
-//                    example = "true",
-//                    required = true)
-//            @PathVariable("gender") String gender,
-//            HttpServletRequest request){
-//
-//        userService.changeGender(gender, request);
-//
-//    }
-//
+    @ApiOperation(value = "Изменение пола (нужен jwt-token)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "---"),
+            @ApiResponse(code = 201, message = "Gender has been changed"),
+            @ApiResponse(code = 400, message = "Incorrect JSON")
+    })
+    @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping("/changeGender/{gender}")
+    public Mono<Void> changeGender(
+            @ApiParam(type = "Boolean",
+                    value = "Пол, отвечающий на вопрос: Это мужчина? true - мужской, false - женский",
+                    example = "true",
+                    required = true)
+            @PathVariable("gender") String gender,
+            ServerHttpRequest request){
+        return userService.changeGender(gender, request);
+    }
+
 //    @ApiOperation(value = "Изменение ФИО (нужен jwt-token)")
 //    @ApiResponses(value = {
 //            @ApiResponse(code = 200, message = "---"),
