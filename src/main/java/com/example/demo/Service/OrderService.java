@@ -136,12 +136,57 @@ public class OrderService {
     }
 
 
-//    /**
-//     * Получение всех Заказов (DTO) по Пользователю
-//     * @param request request, который должен содержать jwToken
-//     */
-//    public List<OrderDTO> getAllOrdersDTOByUser(HttpServletRequest request) {
-//
+    /**
+     * Получение всех Заказов (DTO) по Пользователю
+     * @param request request, который должен содержать jwToken
+     */
+    public Flux<OrderDTO> getAllOrdersDTOByUser(ServerHttpRequest request) {
+        List<String> headersList = request.getHeaders().get(HEADER_JWT_STRING);
+        String tokenWithPrefix = null;
+        if(headersList != null)
+            tokenWithPrefix = headersList.get(0);
+
+        if(tokenWithPrefix != null) {
+            String telephoneNumber = jwTokenService.
+                    getNameFromJWT(tokenWithPrefix.replace(TOKEN_PREFIX, ""));
+
+            return userRepo
+                    .findByUsername(telephoneNumber)
+                    .switchIfEmpty(Mono.error(new CustomException("Incorrect jwt-token")))
+                    .flux()
+                    .flatMap(userEntity -> {
+                        return orderRepository
+                                .findAllByUserId(userEntity.getId())
+                                .publishOn(Schedulers.boundedElastic())
+                                .map(order -> {
+                                            List<Order_deviceDTO> list = order_deviceRepository
+                                                    .findAllByOrderId(order.getId())
+                                                    .publishOn(Schedulers.boundedElastic())
+                                                    .mapNotNull(order_device -> {
+                                                        DeviceDTO temp = deviceService
+                                                                .getDTOById(String.valueOf(order_device.getDeviceId()))
+                                                                .block();
+                                                        return Order_deviceDTO.create(order_device, temp);
+                                                    })
+                                                    .collectList()
+                                                    .block();
+                                            return OrderDTO.create(order, list);
+                                        }
+                                )
+                                .sort((o1, o2) -> o2.getDataOfCreate().compareTo(o1.getDataOfCreate()));
+                            }
+                    );
+        }
+        return Flux.error(() -> new CustomException("Authorization header is broken"));
+
+
+
+
+
+
+
+
+
 //        //Получение telephoneNumber текущего пользователя по токену
 //        String email = jwTokenService.
 //                getNameFromJWT(request.getHeader(HEADER_JWT_STRING).replace(TOKEN_PREFIX,""));
@@ -153,7 +198,7 @@ public class OrderService {
 //        list.sort((o1, o2) -> o2.getDataOfCreate().compareTo(o1.getDataOfCreate()));
 //
 //        return list;
-//    }
+    }
 
 
     /** Получение абсолютно всех Заказов (DTO) */

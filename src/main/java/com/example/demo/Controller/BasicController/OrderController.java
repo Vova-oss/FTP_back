@@ -44,15 +44,13 @@ public class OrderController {
         return orderService.addAnOrder(body, request);
     }
 
-//
-//
-//    @ApiOperation(value = "Получение всех заказов конкретного пользователя")
-//    @GetMapping("/getAllByUser")
-//    public List<OrderDTO> getAllOrdersByUser(HttpServletRequest request){
-//
-//        return orderService.getAllOrdersDTOByUser(request);
-//
-//    }
+
+
+    @ApiOperation(value = "Получение всех заказов конкретного пользователя")
+    @GetMapping("/getAllByUser")
+    public Flux<OrderDTO> getAllOrdersByUser(ServerHttpRequest request){
+        return orderService.getAllOrdersDTOByUser(request);
+    }
 
 
 
