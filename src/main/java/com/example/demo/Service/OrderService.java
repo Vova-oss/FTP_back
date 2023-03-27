@@ -2,13 +2,16 @@ package com.example.demo.Service;
 
 
 import com.example.demo.Controller.AuxiliaryClasses.CustomException;
-import com.example.demo.Controller.AuxiliaryClasses.StaticMethods;
-import com.example.demo.Entity.Device;
+import com.example.demo.DTO.DeviceDTO;
+import com.example.demo.DTO.OrderDTO;
+import com.example.demo.DTO.Order_deviceDTO;
 import com.example.demo.Entity.Enum.EStatusOfOrder;
 import com.example.demo.Entity.Order;
 import com.example.demo.Entity.Order_device;
 import com.example.demo.Entity.UserEntity;
+import com.example.demo.Repositories.DeviceRepository;
 import com.example.demo.Repositories.OrderRepository;
+import com.example.demo.Repositories.Order_deviceRepository;
 import com.example.demo.Repositories.UserRepo;
 import com.example.demo.Security.Service.JWTokenService;
 import org.json.JSONArray;
@@ -19,9 +22,11 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.example.demo.Security.SecurityConstants.HEADER_JWT_STRING;
 import static com.example.demo.Security.SecurityConstants.TOKEN_PREFIX;
@@ -37,6 +42,10 @@ public class OrderService {
     JWTokenService jwTokenService;
     @Autowired
     Order_deviceService order_deviceService;
+    @Autowired
+    Order_deviceRepository order_deviceRepository;
+    @Autowired
+    DeviceRepository deviceRepository;
 
     @Autowired
     OrderRepository orderRepository;
@@ -145,19 +154,41 @@ public class OrderService {
 //
 //        return list;
 //    }
+
+
+    /** Получение абсолютно всех Заказов (DTO) */
+    public Flux<OrderDTO> getAllOrdersDTO(){
+        return orderRepository
+                .findAll()
+                .publishOn(Schedulers.boundedElastic())
+                .map(order -> {
+                            List<Order_deviceDTO> list = order_deviceRepository
+                                    .findAllByOrderId(order.getId())
+                                    .publishOn(Schedulers.boundedElastic())
+                                    .mapNotNull(order_device -> {
+                                        DeviceDTO temp = deviceService
+                                                .getDTOById(String.valueOf(order_device.getDeviceId()))
+                                                .block();
+                                        return Order_deviceDTO.create(order_device, temp);
+                                    })
+                                    .collectList()
+                                    .block();
+                            return OrderDTO.create(order, list);
+                        }
+                )
+                .sort((o1, o2) -> o2.getDataOfCreate().compareTo(o1.getDataOfCreate()));
+
+
 //
-//
-//    /** Получение абсолютно всех Заказов (DTO) */
-//    public List<OrderDTO> getAllOrdersDTO(){
 //        List<Order> orders = orderRepository.findAll();
 //        List<OrderDTO> list = OrderDTO.createList(orders);
 //        //Сортировка листа по дате создания
 //        list.sort((o1, o2) -> o2.getDataOfCreate().compareTo(o1.getDataOfCreate()));
 //
 //        return list;
-//    }
-//
-//
+    }
+
+
 //    /**
 //     * Изменение Статуса заказа
 //     * @param body [json] содержит:

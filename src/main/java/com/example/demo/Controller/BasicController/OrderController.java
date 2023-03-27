@@ -1,11 +1,13 @@
 package com.example.demo.Controller.BasicController;
 
+import com.example.demo.DTO.OrderDTO;
 import com.example.demo.Service.OrderService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -51,17 +53,17 @@ public class OrderController {
 //        return orderService.getAllOrdersDTOByUser(request);
 //
 //    }
-//
-//
-//
-//    @ApiOperation(value = "Получение абсолютно всех заказов")
-//    @GetMapping("/getAll")
-//    public List<OrderDTO> getAllOrders(){
-//        return orderService.getAllOrdersDTO();
-//    }
-//
-//
-//
+
+
+
+    @ApiOperation(value = "Получение абсолютно всех заказов")
+    @GetMapping("/getAll")
+    public Flux<OrderDTO> getAllOrders(){
+        return orderService.getAllOrdersDTO();
+    }
+
+
+
 //    @ApiOperation(value = "Изменение статуса у заказа")
 //    @PutMapping("/changeStatusOfOrder")
 //    @ApiResponses(value = {
