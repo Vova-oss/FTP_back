@@ -19,7 +19,7 @@ import java.util.Objects;
 
 @Api(tags = "User")
 @RestController
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("*")
 @RequestMapping("/user")
 public class UserController {
 

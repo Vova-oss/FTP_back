@@ -75,7 +75,7 @@ public class UserService implements ReactiveUserDetailsService {
                                             userEntity.getUsername(),
                                             userEntity.getRole().name())
 
-                    ).build() : UNAUTHORIZED;
+                    ).body(new ResponseClass(200, userEntity.getRole().name())) : UNAUTHORIZED;
                 }).defaultIfEmpty(UNAUTHORIZED);
     }
 

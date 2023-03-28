@@ -371,7 +371,6 @@ public class DeviceService {
      */
     public Mono<DeviceDTO> getDTOById(String id) {
 
-
         return deviceDTORepo
                 .getById(Long.valueOf(id))
                 .publishOn(Schedulers.boundedElastic())

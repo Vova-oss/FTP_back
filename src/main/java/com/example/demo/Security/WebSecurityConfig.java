@@ -8,10 +8,20 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -34,6 +44,7 @@ public class WebSecurityConfig  {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity){
         return httpSecurity
+                .cors(corsSpec -> corsSpec.configurationSource(corsConfiguration()))
                 .exceptionHandling()
                 .authenticationEntryPoint(
                         (swe, e) ->
@@ -83,6 +94,33 @@ public class WebSecurityConfig  {
 
                 .and()
                 .build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfiguration() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.applyPermitDefaultValues();
+        corsConfig.setAllowCredentials(false);
+        corsConfig.addAllowedMethod("POST");
+        corsConfig.addAllowedMethod("GET");
+        corsConfig.addAllowedMethod("PUT");
+        corsConfig.addAllowedMethod("DELETE");
+        corsConfig.addAllowedOriginPattern("*");
+        corsConfig.addExposedHeader("*");
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+        source.registerCorsConfiguration("/user/**", corsConfig);
+        source.registerCorsConfiguration("/order/**", corsConfig);
+        source.registerCorsConfiguration("/device/**", corsConfig);
+        source.registerCorsConfiguration("/brand/**", corsConfig);
+        source.registerCorsConfiguration("/type/**", corsConfig);
+        return source;
+    }
+
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        return new CorsWebFilter(corsConfiguration());
     }
 
 }
