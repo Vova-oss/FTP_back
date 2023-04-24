@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.example.demo.Entity.Order;
+import com.example.demo.Kafka.Message.OrderMessage;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -55,12 +56,12 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public ProducerFactory<String, Order> producerFactory() {
+    public ProducerFactory<String, OrderMessage> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
     @Bean
-    public KafkaTemplate<String, Order> kafkaTemplate() {
+    public KafkaTemplate<String, OrderMessage> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 
@@ -75,14 +76,14 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public ConsumerFactory<String, Order> consumerFactory() {
+    public ConsumerFactory<String, OrderMessage> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(),
-                new JsonDeserializer<>(Order.class));
+                new JsonDeserializer<>(OrderMessage.class));
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Order> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Order> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, OrderMessage> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, OrderMessage> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;

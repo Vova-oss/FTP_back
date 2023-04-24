@@ -9,6 +9,7 @@ import com.example.demo.Entity.Enum.EStatusOfOrder;
 import com.example.demo.Entity.Order;
 import com.example.demo.Entity.Order_device;
 import com.example.demo.Entity.UserEntity;
+import com.example.demo.Kafka.PublisherForOrder;
 import com.example.demo.Repositories.DeviceRepository;
 import com.example.demo.Repositories.OrderRepository;
 import com.example.demo.Repositories.Order_deviceRepository;
@@ -26,7 +27,6 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.example.demo.Security.SecurityConstants.HEADER_JWT_STRING;
 import static com.example.demo.Security.SecurityConstants.TOKEN_PREFIX;
@@ -46,6 +46,8 @@ public class OrderService {
     Order_deviceRepository order_deviceRepository;
     @Autowired
     DeviceRepository deviceRepository;
+    @Autowired
+    PublisherForOrder publisherForOrder;
 
     @Autowired
     OrderRepository orderRepository;
@@ -89,7 +91,11 @@ public class OrderService {
                     .flatMap(userEntity -> {
                         return createAndSaveNewOrder(userEntity, totalSumCheck)
                                 .flatMap(order -> {
-                                    return createAndSaveOrder_device(array, order.getId()).then(Mono.empty());
+                                    return createAndSaveOrder_device(array, order.getId())
+                                            .collectList()
+                                            .flatMap(list -> {
+                                                return publisherForOrder.createOrderMessage(order, list);
+                                            }).then(Mono.empty());
                                 })
                         ;
                     })
@@ -116,7 +122,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    private Mono<Void> createAndSaveOrder_device(JSONArray array, Long orderId){
+    private Flux<Order_device> createAndSaveOrder_device(JSONArray array, Long orderId){
         List<Order_device> order_devices = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             JSONObject current;
@@ -129,7 +135,7 @@ public class OrderService {
                         )
                 );
             } catch (JSONException e) {
-                return Mono.error(() -> new CustomException("Incorrect JSON"));
+                return Flux.error(() -> new CustomException("Incorrect JSON"));
             }
         }
         return order_deviceService.saveAll(order_devices);
