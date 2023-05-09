@@ -5,17 +5,24 @@ import com.example.demo.Entity.Order;
 import com.example.demo.Entity.Order_device;
 import com.example.demo.Kafka.Message.DeviceInOrder;
 import com.example.demo.Kafka.Message.OrderMessage;
+import com.example.demo.Kafka.Message.OrderStatusMessage;
 import com.example.demo.Repositories.DeviceRepository;
+import com.example.demo.Repositories.OrderRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.kafka.receiver.KafkaReceiver;
+import reactor.kafka.receiver.ReceiverRecord;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,13 +31,18 @@ public class PublisherForOrder {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
+    private KafkaReceiver<String, String> kafkaReceiver;
+    @Autowired
     private KafkaTemplate<String, OrderMessage> kafkaTemplate;
     @Autowired
     DeviceRepository deviceRepository;
+    @Autowired
+    OrderRepository orderRepository;
 
-    private void sendMessage(String topic, OrderMessage message) {
+
+    private void sendMessage(OrderMessage message) {
         logger.info(String.format("#### -> Producing message -> %s", message));
-        this.kafkaTemplate.send(topic, message);
+        this.kafkaTemplate.send(TOPIC, message);
     }
 
     public Mono<Void> createOrderMessage(Order order, List<Order_device> order_device) {
@@ -41,12 +53,27 @@ public class PublisherForOrder {
                     .collectList()
                     .map(deviceInOrders -> {
                         orderMessage.setDevices(deviceInOrders);
-                        sendMessage(TOPIC, orderMessage);
+                        sendMessage(orderMessage);
                         return deviceInOrders;
                     }).then(Mono.empty());
         }catch (Exception e){
             return Mono.error(() -> new CustomException("Some exception while sending message to Kafka"));
         }
+    }
+
+    @PostConstruct()
+    public void listen() {
+        kafkaReceiver
+                .receive()
+                .flatMap(record -> {
+                    // обработка сообщения
+                    try {
+                        OrderStatusMessage osm = new ObjectMapper().readValue(record.value(), OrderStatusMessage.class);
+                        return orderRepository.updateStatusById(Long.valueOf(osm.getId()), osm.getStatus());
+                    } catch (JsonProcessingException ignored) {}
+                    return Mono.just(record);
+                })
+                .subscribe();
     }
 
 //    @Scheduled(fixedDelay = 5000)

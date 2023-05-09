@@ -1,10 +1,12 @@
 package com.example.demo.Kafka;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.example.demo.Entity.Order;
 import com.example.demo.Kafka.Message.OrderMessage;
+import com.example.demo.Kafka.Message.OrderStatusMessage;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -20,11 +22,14 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import reactor.kafka.receiver.KafkaReceiver;
+import reactor.kafka.receiver.ReceiverOptions;
+
 
 @Configuration
 public class KafkaConfiguration {
 
-//    private static final String TOPIC = "order_topic";
+    private static final String TOPIC = "order_topic";
 //    private static final String BOOTSTRAP_SERVERS = "localhost:9092";
 //    private static final String CLIENT_ID_CONFIG = "main_serv";
 //    private static final String GROUP_ID_CONFIG = "main_group";
@@ -46,6 +51,9 @@ public class KafkaConfiguration {
 
     private static final String BOOTSTRAP_SERVERS = "localhost:9092";
 
+
+    // PRODUCER CONFIGS
+
     @Bean
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>();
@@ -65,27 +73,46 @@ public class KafkaConfiguration {
         return new KafkaTemplate<>(producerFactory());
     }
 
+    // CONSUMER CONFIGS
+
+//    @Bean
+//    public Map<String, Object> consumerConfigs() {
+//        Map<String, Object> props = new HashMap<>();
+//        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+//        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+//        props.put(ConsumerConfig.GROUP_ID_CONFIG, "json");
+//        return props;
+//    }
+//
+//    @Bean
+//    public ConsumerFactory<String, OrderMessage> consumerFactory() {
+//        return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(),
+//                new JsonDeserializer<>(OrderMessage.class));
+//    }
+//
+//    @Bean
+//    public ConcurrentKafkaListenerContainerFactory<String, OrderMessage> kafkaListenerContainerFactory() {
+//        ConcurrentKafkaListenerContainerFactory<String, OrderMessage> factory =
+//                new ConcurrentKafkaListenerContainerFactory<>();
+//        factory.setConsumerFactory(consumerFactory());
+//        return factory;
+//    }
+
+
     @Bean
-    public Map<String, Object> consumerConfigs() {
+    public ReceiverOptions<String, String> receiverOptions() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "json");
-        return props;
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "group_id");
+        return ReceiverOptions.create(props);
     }
 
     @Bean
-    public ConsumerFactory<String, OrderMessage> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(),
-                new JsonDeserializer<>(OrderMessage.class));
+    public KafkaReceiver<String, String> kafkaReceiver(ReceiverOptions<String, String> receiverOptions) {
+        return KafkaReceiver.create(receiverOptions.subscription(Collections.singleton(TOPIC)));
     }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, OrderMessage> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, OrderMessage> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        return factory;
-    }
 }
