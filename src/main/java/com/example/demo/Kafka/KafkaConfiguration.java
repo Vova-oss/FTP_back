@@ -24,6 +24,8 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import reactor.kafka.receiver.KafkaReceiver;
 import reactor.kafka.receiver.ReceiverOptions;
+import reactor.kafka.sender.KafkaSender;
+import reactor.kafka.sender.SenderOptions;
 
 
 @Configuration
@@ -71,6 +73,14 @@ public class KafkaConfiguration {
     @Bean
     public KafkaTemplate<String, OrderMessage> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean
+    public KafkaSender<String, OrderMessage> kafkaSender(){
+        SenderOptions<String, OrderMessage> senderOptions =
+                SenderOptions.<String, OrderMessage>create(producerConfigs())
+                        .maxInFlight(1024);
+        return KafkaSender.create(senderOptions);
     }
 
     // CONSUMER CONFIGS

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.kafka.receiver.KafkaReceiver;
 import reactor.kafka.receiver.ReceiverRecord;
+import reactor.kafka.sender.KafkaSender;
+import reactor.kafka.sender.SenderOptions;
+import reactor.kafka.sender.SenderRecord;
 
 import java.util.List;
 
@@ -33,6 +37,8 @@ public class PublisherForOrder {
     @Autowired
     private KafkaReceiver<String, String> kafkaReceiver;
     @Autowired
+    private KafkaSender<String, OrderMessage> kafkaSender;
+    @Autowired
     private KafkaTemplate<String, OrderMessage> kafkaTemplate;
     @Autowired
     DeviceRepository deviceRepository;
@@ -42,7 +48,7 @@ public class PublisherForOrder {
 
     private void sendMessage(OrderMessage message) {
         logger.info(String.format("#### -> Producing message -> %s", message));
-        this.kafkaTemplate.send(TOPIC, message);
+        kafkaSender.send(Mono.just(SenderRecord.create(new ProducerRecord<>(TOPIC, message), null))).then().subscribe();
     }
 
     public Mono<Void> createOrderMessage(Order order, List<Order_device> order_device) {
